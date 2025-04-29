@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "declaration": true,
+    "outDir": "dist",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"],
+    "rootDir": "src",
+    "paths": {
+      "d3-selection": ["../node_modules/d3-selection"]
+    },
+    "verbatimModuleSyntax": false,
+    "noImplicitAny": false,
+    "useDefineForClassFields": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": false,
+    "strictNullChecks": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", ".backup"]
+}

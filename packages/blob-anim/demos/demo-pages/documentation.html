@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../blob-anim-demo.css" />
+  <title>BlobAnim Documentation</title>
+</head>
+<body>
+  <div class="header">
+    <h1>BlobAnim Documentation</h1>
+    <a href="../index.html">Back to Main Demo</a>
+  </div>
+  <div class="layout">
+    <div class="card">
+      <div class="card-header">Documentation</div>
+      <div class="card-body">
+        <h3>Installation</h3>
+        <p>You can use BlobAnim in several ways:</p>
+
+        <h4>1. Via npm</h4>
+        <div class="code-sample">npm install blob-anim</div>
+
+        <h4>2. Direct download</h4>
+        <p>
+          Download the library file and include it in your project. Note that
+          you need to include D3.js as well:
+        </p>
+        <div class="code-sample">
+          <span class="element">&lt;script</span>
+          <span class="attribute">src</span>=<span class="value"
+            >"https://d3js.org/d3.v7.min.js"</span
+          ><span class="element">&gt;&lt;/script&gt;</span>
+          <span class="element">&lt;script type=\"module\" src=\"blob-anim.es.js\"&gt;&lt;/script&gt;</span>
+        </div>
+
+        <h3>Configuration Options</h3>
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>count</code></td>
+            <td>Number</td>
+            <td>5</td>
+            <td>Number of blobs to display</td>
+          </tr>
+          <tr>
+            <td><code>size</code></td>
+            <td>Number</td>
+            <td>20</td>
+            <td>Size of each blob</td>
+          </tr>
+          <tr>
+            <td><code>colors</code></td>
+            <td>Array</td>
+            <td>null</td>
+            <td>Array of colors to use for blobs (overrides single color)</td>
+          </tr>
+          <tr>
+            <td><code>opacity</code></td>
+            <td>Number</td>
+            <td>1</td>
+            <td>Opacity of the blobs (0-1)</td>
+          </tr>
+          <tr>
+            <td><code>speed</code></td>
+            <td>Number</td>
+            <td>1</td>
+            <td>Animation speed (higher = faster)</td>
+          </tr>
+          <tr>
+            <td><code>state</code></td>
+            <td>String</td>
+            <td>'chaos'</td>
+            <td>Animation state: 'chaos', 'organizing', 'structured'</td>
+          </tr>
+          <tr>
+            <td><code>variant</code></td>
+            <td>String</td>
+            <td>'default'</td>
+            <td>Animation variant within each state</td>
+          </tr>
+          <tr>
+            <td><code>gooey</code></td>
+            <td>Boolean</td>
+            <td>true</td>
+            <td>Enable gooey effect</td>
+          </tr>
+          <tr>
+            <td><code>scaleEffects</code></td>
+            <td>Boolean</td>
+            <td>true</td>
+            <td>Enable scaling effects during animation</td>
+          </tr>
+          <tr>
+            <td><code>width</code></td>
+            <td>Number</td>
+            <td>Container width</td>
+            <td>Width of the animation container (px)</td>
+          </tr>
+          <tr>
+            <td><code>height</code></td>
+            <td>Number</td>
+            <td>Container height</td>
+            <td>Height of the animation container (px)</td>
+          </tr>
+          <tr>
+            <td><code>colorMode</code></td>
+            <td>String</td>
+            <td>'random'</td>
+            <td>How to use colors from colorList: 'random', 'sequence', or 'gradient'</td>
+          </tr>
+          <tr>
+            <td><code>gradient</code></td>
+            <td>Boolean</td>
+            <td>false</td>
+            <td>Enable radial gradient fill effect for blobs</td>
+          </tr>
+          <tr>
+            <td><code>glass</code></td>
+            <td>Boolean</td>
+            <td>false</td>
+            <td>Enable glass effect for blobs</td>
+          </tr>
+          <tr>
+            <td><code>glassBlobs</code></td>
+            <td>Array</td>
+            <td>[]</td>
+            <td>Array of blob indices to apply glass effect to</td>
+          </tr>
+          <tr>
+            <td><code>chaosAmount</code></td>
+            <td>Number</td>
+            <td>1</td>
+            <td>Amount of chaos/randomness in animations (0-1)</td>
+          </tr>
+        </table>
+
+        <h3>Animation States and Variants</h3>
+        <p>
+          The library includes several pre-defined animation states and
+          variants:
+        </p>
+
+        <table>
+          <tr>
+            <th>State</th>
+            <th>Variants</th>
+          </tr>
+          <tr>
+            <td><code>chaos</code></td>
+            <td><code>default</code>, <code>random</code>, <code>spiral</code>, <code>explosion</code>, <code>brownian</code>, <code>math-explosion</code>, <code>math</code>, <code>circle</code></td>
+          </tr>
+          <tr>
+            <td><code>organizing</code></td>
+            <td><code>default</code>, <code>grid</code>, <code>spiral</code>, <code>wave</code>, <code>cylinder</code></td>
+          </tr>
+          <tr>
+            <td><code>structured</code></td>
+            <td><code>default</code>, <code>grid</code>, <code>circle</code>, <code>orbit</code>, <code>flower</code>, <code>basic</code></td>
+          </tr>
+        </table>
+
+        <h3>JavaScript API</h3>
+        <p>
+          The library provides several methods for controlling the animation:
+        </p>
+
+        <div class="code-sample">
+          <span class="comment">// Create an animation</span>
+          <span class="keyword">const</span> animation =
+          createAnim(container, options);
+
+          <span class="comment">// Update configuration</span>
+          animation.update({ count: <span class="number">5</span>, colors:
+          <span class="string">['#10b981']</span>
+          });
+
+          <span class="comment">// Pause animation</span>
+          animation.pause();
+
+          <span class="comment">// Resume animation</span>
+          animation.resume();
+
+          <span class="comment"
+            >// Resize the animation (for web component only)</span
+          >
+          blobAnimElement.resize(<span class="number">400</span>,
+          <span class="number">300</span>);
+
+          <span class="comment">// Get performance metrics</span>
+          const metrics = animation.getPerformanceMetrics();
+          console.log(`Current FPS: ${metrics.fps}`);
+
+          <span class="comment">// Clean up resources</span>
+          animation.destroy();
+        </div>
+
+        <h3>Advanced Usage and Customization</h3>
+        <p>
+          BlobAnim supports advanced customization through the JavaScript API.
+          You can define custom animation patterns by extending the library's
+          functionality:
+        </p>
+
+        <div class="code-sample">
+          <span class="comment">// Define a custom animation pattern</span>
+          <span class="keyword">function</span> customPattern(d, i, t, count,
+          w, h) { <span class="keyword">const</span> centerX = w / 2;
+          <span class="keyword">const</span> centerY = h / 2;
+          <span class="keyword">const</span> angle = (i / count) * Math.PI * 2
+          + t; <span class="keyword">const</span> radius = w * 0.3 +
+          Math.sin(t * 3 + i) * w * 0.05;
+
+          <span class="keyword">return</span> { x: centerX + Math.cos(angle) *
+          radius, y: centerY + Math.sin(angle) * radius }; }
+
+          <span class="comment"
+            >// Apply the custom pattern (Note: This requires direct API
+            access)</span
+          >
+          <span class="keyword">const</span> animation =
+          createAnim(container, { count: 5, colors: ['#10b981'],
+          gooey:
+          <span class="keyword">true</span>
+          });
+
+          <span class="comment"
+            >// Currently, custom patterns require modifying the library or
+            using a wrapper</span
+          >
+          <span class="comment"
+            >// Future updates may provide direct pattern injection</span
+          >
+        </div>
+
+        <h4>Further Resources</h4>
+        <p>
+          For complete documentation, additional examples, and to contribute
+          or report issues, visit the
+          <a
+            href="https://github.com/everydaycodeio/blob-anim"
+            target="_blank"
+            >BlobAnim GitHub Repository</a
+          >.
+        </p>
+
+        <h3>Using RGBA Colors</h3>
+        <p>
+          BlobAnim supports RGBA colors for creating semi-transparent or
+          gradient-like effects. You can use RGBA colors in two ways:
+        </p>
+
+        <div class="code-sample">
+          <span class="comment"
+            >// Method 1: Use RGBA color string (transparency included in
+            color)</span
+          >
+          <span class="element">&lt;blob-element</span>
+          <span class="attribute">color</span>=<span class="value"
+            >"rgba(59, 130, 246, 0.5)"</span
+          >
+          <span class="attribute">count</span>=<span class="value">"15"</span>
+          <span class="element">&gt;&lt;/blob-element&gt;</span>
+
+          <span class="comment"
+            >// Method 2: Use hex/rgb color with separate opacity
+            setting</span
+          >
+          <span class="element">&lt;blob-element</span>
+          <span class="attribute">color</span>=<span class="value"
+            >"#3b82f6"</span
+          >
+          <span class="attribute">opacity</span>=<span class="value"
+            >"0.5"</span
+          >
+          <span class="attribute">count</span>=<span class="value">"15"</span>
+          <span class="element">&gt;&lt;/blob-element&gt;</span>
+        </div>
+
+        <p>
+          When using RGBA colors, if you don't specify an
+          <code>opacity</code> attribute, the alpha channel from the RGBA
+          color will be used automatically. If both are specified, the
+          <code>opacity</code> attribute will take precedence.
+        </p>
+
+        <h3>Using Multiple Colors</h3>
+        <p>
+          BlobAnim supports using multiple colors for blobs. You can provide
+          an array of colors and specify how they should be applied:
+        </p>
+
+        <div class="code-sample">
+          <span class="comment"
+            >// Using multiple colors with the Web Component</span
+          >
+          <span class="element">&lt;blob-element</span>
+          <span class="attribute">colorlist</span>=<span class="value"
+            >'["#3b82f6", "#10b981", "#f59e0b", "#ef4444"]'</span
+          >
+          <span class="attribute">colormode</span>=<span class="value"
+            >"random"</span
+          >
+          <span class="element">&gt;&lt;/blob-element&gt;</span>
+
+          <span class="comment"
+            >// Using multiple colors with the JavaScript API</span
+          >
+          <span class="keyword">const</span> animation =
+          createAnim(container, { colors: ['#3b82f6', '#10b981',
+          '#f59e0b', '#ef4444'], colorMode:
+          <span class="string">'sequence'</span>
+          });
+        </div>
+
+        <p>There are three color modes available:</p>
+        <ul>
+          <li>
+            <strong>random</strong> - Each blob gets a randomly selected color
+            from the list
+          </li>
+          <li>
+            <strong>sequence</strong> - Colors are applied in sequence to
+            blobs in order
+          </li>
+          <li>
+            <strong>gradient</strong> - Colors are distributed evenly based on
+            position
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

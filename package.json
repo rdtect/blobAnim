@@ -1,0 +1,49 @@
+{
+  "name": "blob-anim-monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "bun --filter showcase dev",
+    "dev:lib": "bun --filter blob-anim dev",
+    "dev:canvas": "bun --filter canvas-blob dev",
+    "dev:pixi": "bun --filter pixi-blob dev",
+    "dev:showcase": "bun --filter showcase dev",
+    "dev:demo": "bun run build:libs && bun --filter demo-hub dev",
+    "dev:demo:server": "bun run build:libs && bun --filter demo-hub server",
+    "dev:demo:with-deps": "bun --filter demo-hub dev:with-deps",
+    "dev:demo:server:with-deps": "bun --filter demo-hub server:with-deps",
+    "build": "bun run build:all",
+    "build:all": "bun run build:libs && bun run build:apps",
+    "build:libs": "bun run build:blob-anim && bun run build:canvas-blob && bun run build:pixi-blob",
+    "build:apps": "bun run build:showcase && bun run build:demo",
+    "build:blob-anim": "bun --filter blob-anim build",
+    "build:canvas-blob": "bun --filter canvas-blob build",
+    "build:pixi-blob": "bun --filter pixi-blob build",
+    "build:showcase": "bun --filter showcase build",
+    "build:demo": "bun --filter demo-hub build",
+    "preview:blob-anim": "bun --filter blob-anim preview",
+    "preview:canvas-blob": "bun --filter canvas-blob preview",
+    "preview:pixi-blob": "bun --filter pixi-blob preview",
+    "preview:showcase": "bun --filter showcase preview",
+    "type-check": "bun run type-check:all",
+    "type-check:all": "bun run type-check:blob-anim && bun run type-check:canvas-blob && bun run type-check:pixi-blob",
+    "type-check:blob-anim": "bun --filter blob-anim type-check",
+    "type-check:canvas-blob": "bun --filter canvas-blob type-check",
+    "type-check:pixi-blob": "bun --filter pixi-blob type-check",
+    "start": "bun run build:all && bun --filter demo-hub server",
+    "start:dev": "bun run build:all && bun --filter demo-hub dev"
+  },
+  "devDependencies": {
+    "vite": "^4.5.13",
+    "@types/bun": "latest",
+    "typescript": "^5.8.3",
+    "serve": "^14.2.4",
+    "@types/d3": "^7.4.3",
+    "@types/p5": "^1.4.5",
+    "@types/pixi.js": "^5.0.0"
+  }
+}

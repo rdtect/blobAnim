@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas Blob Demo</title>
+    <!-- Add P5.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+      .layout {
+        display: flex;
+        flex-direction: column;
+        max-width: 800px;
+        margin: 0 auto;
+        gap: 20px;
+      }
+      .card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .card-header {
+        background-color: #4a6cf7;
+        color: white;
+        padding: 15px 20px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .card-body {
+        padding: 20px;
+      }
+      .demo-container {
+        width: 100%;
+        height: 400px;
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #1a1a2e;
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+      .control {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      label {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      input[type="range"] {
+        width: 100%;
+      }
+      select {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+      .color-picker {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .value {
+        font-weight: bold;
+        color: #4a6cf7;
+      }
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      button {
+        background-color: #4a6cf7;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      button:hover {
+        background-color: #3b5fe0;
+      }
+      button.danger {
+        background-color: #dc3545;
+      }
+      button.danger:hover {
+        background-color: #c82333;
+      }
+      .radio-group {
+        display: flex;
+        gap: 15px;
+      }
+      .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .metrics {
+        font-size: 14px;
+        background-color: rgba(0, 0, 0, 0.2);
+        padding: 5px 10px;
+        border-radius: 4px;
+      }
+      .pattern-variants {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .pattern-variant {
+        padding: 8px;
+        text-align: center;
+        background-color: #f0f0f0;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .pattern-variant:hover {
+        background-color: #e0e0e0;
+      }
+      .pattern-variant.active {
+        background-color: #4a6cf7;
+        color: white;
+      }
+      .checkbox-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      #error-message {
+        background-color: #ffebee;
+        color: #c62828;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <div class="card">
+        <div class="card-header">
+          Canvas Blob Demo
+          <div class="metrics">
+            <span id="fps">0 FPS</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="error-message"></div>
+          <div class="demo-container" id="demo-container">
+            <!-- The canvas will be injected here -->
+          </div>
+
+          <div class="controls">
+            <div class="control">
+              <label for="patternSelect">Animation Pattern</label>
+              <select id="patternSelect">
+                <option value="chaos">Chaos</option>
+                <option value="organizing">Organizing</option>
+                <option value="structured">Structured</option>
+              </select>
+              <div class="pattern-variants" id="patternVariants">
+                <!-- Variants will be added dynamically -->
+              </div>
+            </div>
+
+            <div class="control">
+              <label for="count"
+                >Count <span class="value" id="countValue">5</span></label
+              >
+              <input
+                type="range"
+                id="count"
+                min="3"
+                max="12"
+                value="5"
+                step="1"
+              />
+            </div>
+
+            <div class="control">
+              <label for="size"
+                >Size <span class="value" id="sizeValue">20</span></label
+              >
+              <input
+                type="range"
+                id="size"
+                min="10"
+                max="100"
+                value="20"
+                step="1"
+              />
+            </div>
+
+            <div class="control">
+              <label for="speed"
+                >Speed <span class="value" id="speedValue">1</span></label
+              >
+              <input
+                type="range"
+                id="speed"
+                min="0.1"
+                max="5"
+                value="1"
+                step="0.1"
+              />
+            </div>
+
+            <div class="control">
+              <label for="colorPicker">Main Color</label>
+              <div class="color-picker">
+                <input type="color" id="colorPicker" value="#4a6cf7" />
+              </div>
+            </div>
+
+            <div class="control">
+              <label>Gooey Effect</label>
+              <div class="checkbox-control">
+                <input type="checkbox" id="gooeyToggle" checked />
+                <label for="gooeyToggle">Enable Gooey Effect</label>
+              </div>
+            </div>
+
+            <div class="control">
+              <label>Gooey Intensity</label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="intensityLight"
+                    name="gooeyIntensity"
+                    value="light"
+                  />
+                  <label for="intensityLight">Light</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="intensityMedium"
+                    name="gooeyIntensity"
+                    value="medium"
+                    checked
+                  />
+                  <label for="intensityMedium">Medium</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="intensityHeavy"
+                    name="gooeyIntensity"
+                    value="heavy"
+                  />
+                  <label for="intensityHeavy">Heavy</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="control">
+              <label for="attraction"
+                >Attraction
+                <span class="value" id="attractionValue">0.5</span></label
+              >
+              <input
+                type="range"
+                id="attraction"
+                min="0"
+                max="2"
+                value="0.5"
+                step="0.1"
+              />
+            </div>
+
+            <div class="control">
+              <label for="repulsion"
+                >Repulsion
+                <span class="value" id="repulsionValue">0.3</span></label
+              >
+              <input
+                type="range"
+                id="repulsion"
+                min="0"
+                max="1"
+                value="0.3"
+                step="0.1"
+              />
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button id="pauseBtn">Pause</button>
+            <button id="resumeBtn" disabled>Resume</button>
+            <button class="danger" id="resetBtn">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      // Simple error handler to display issues to the user
+      const errorContainer = document.getElementById("error-message");
+      function showError(message) {
+        console.error(message);
+        errorContainer.textContent = message;
+        errorContainer.style.display = "block";
+      }
+
+      // Wrap in try-catch to display any errors
+      try {
+        console.log("Loading canvas-blob library...");
+        const {
+          CanvasBlobEngine,
+          CanvasRenderer,
+          PatternRegistry,
+          ANIMATION_CONFIG,
+        } = await import("../dist/canvas-blob.es.js");
+
+        console.log("Library loaded successfully:", {
+          CanvasBlobEngine: !!CanvasBlobEngine,
+          CanvasRenderer: !!CanvasRenderer,
+          PatternRegistry: !!PatternRegistry,
+        });
+
+        // Create and initialize the demo
+        document.addEventListener("DOMContentLoaded", () => {
+          try {
+            console.log("DOM loaded, initializing demo");
+            const demoContainer = document.getElementById("demo-container");
+            const canvas = document.createElement("canvas");
+            canvas.width = demoContainer.clientWidth;
+            canvas.height = demoContainer.clientHeight;
+            demoContainer.appendChild(canvas);
+            console.log(`Canvas created: ${canvas.width}x${canvas.height}`);
+
+            // Available pattern variants
+            const patternVariants = {
+              chaos: ["default"],
+              organizing: ["default"],
+              structured: ["default", "circle", "pulse"],
+            };
+
+            // Initialize pattern variants UI
+            const patternVariantsContainer =
+              document.getElementById("patternVariants");
+            const updatePatternVariantsUI = (pattern) => {
+              patternVariantsContainer.innerHTML = "";
+              patternVariants[pattern].forEach((variant) => {
+                const variantEl = document.createElement("div");
+                variantEl.className = "pattern-variant";
+                variantEl.innerText =
+                  variant.charAt(0).toUpperCase() + variant.slice(1);
+                variantEl.dataset.variant = variant;
+                if (variant === "default") {
+                  variantEl.classList.add("active");
+                }
+                variantEl.addEventListener("click", () => {
+                  document
+                    .querySelectorAll(".pattern-variant")
+                    .forEach((el) => el.classList.remove("active"));
+                  variantEl.classList.add("active");
+                  updatePattern(pattern, variant);
+                });
+                patternVariantsContainer.appendChild(variantEl);
+              });
+            };
+
+            // Initialize the engine
+            console.log("Creating renderer...");
+            const renderer = new CanvasRenderer(canvas);
+
+            console.log("Getting initial pattern...");
+            let pattern = PatternRegistry.getPattern("chaos");
+            console.log("Pattern created:", pattern);
+
+            const config = {
+              count: 5,
+              size: 20,
+              speed: 1,
+              colors: ["#4a6cf7"],
+              gooey: true,
+              gooeyIntensity: "medium",
+              width: canvas.width,
+              height: canvas.height,
+              debug: true, // Enable debug mode to see console messages
+              attraction: 0.5,
+              repulsion: 0.3,
+              state: "chaos",
+              variant: "default",
+              scaleEffects: false,
+              glass: false,
+              gradient: false,
+            };
+
+            console.log("Creating engine with config:", config);
+            const engine = new CanvasBlobEngine({
+              config,
+              renderer,
+              pattern,
+            });
+            console.log("Engine created:", engine);
+
+            // Draw simple circles as fallback if engine fails
+            function drawFallbackCircles() {
+              const ctx = canvas.getContext("2d");
+              if (!ctx) return;
+
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+              // Draw 5 circles in a pattern
+              const colors = [
+                "#4a6cf7",
+                "#6a7dfa",
+                "#8a9bfc",
+                "#aabbfd",
+                "#cce5ff",
+              ];
+              for (let i = 0; i < 5; i++) {
+                const x =
+                  canvas.width * (0.3 + 0.1 * Math.sin(Date.now() * 0.001 + i));
+                const y =
+                  canvas.height *
+                  (0.3 + 0.1 * Math.cos(Date.now() * 0.001 + i));
+                const radius = 20 + 10 * Math.sin(Date.now() * 0.002 + i * 0.5);
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+              }
+
+              requestAnimationFrame(drawFallbackCircles);
+            }
+
+            // Update pattern function
+            function updatePattern(state, variant = "default") {
+              try {
+                console.log(`Updating pattern: ${state}, variant: ${variant}`);
+                const newPattern = PatternRegistry.getPattern(state, variant);
+                engine.setPattern(newPattern);
+                engine.updateConfig({
+                  state,
+                  variant,
+                });
+              } catch (error) {
+                showError(`Error updating pattern: ${error.message}`);
+              }
+            }
+
+            // Set initial pattern variants
+            updatePatternVariantsUI("chaos");
+
+            // Track FPS
+            const fpsElement = document.getElementById("fps");
+            engine.on("fps", ({ fps }) => {
+              fpsElement.textContent = `${Math.round(fps)} FPS`;
+            });
+
+            // Start the animation with error handling
+            try {
+              console.log("Starting animation...");
+              engine.start();
+              console.log("Animation started successfully");
+            } catch (error) {
+              showError(`Failed to start animation: ${error.message}`);
+              console.error("Detailed error:", error);
+              // Start fallback animation
+              drawFallbackCircles();
+            }
+
+            // Control handlers
+            const patternSelect = document.getElementById("patternSelect");
+            const countInput = document.getElementById("count");
+            const countValue = document.getElementById("countValue");
+            const sizeInput = document.getElementById("size");
+            const sizeValue = document.getElementById("sizeValue");
+            const speedInput = document.getElementById("speed");
+            const speedValue = document.getElementById("speedValue");
+            const attractionInput = document.getElementById("attraction");
+            const attractionValue = document.getElementById("attractionValue");
+            const repulsionInput = document.getElementById("repulsion");
+            const repulsionValue = document.getElementById("repulsionValue");
+            const colorPicker = document.getElementById("colorPicker");
+            const pauseBtn = document.getElementById("pauseBtn");
+            const resumeBtn = document.getElementById("resumeBtn");
+            const resetBtn = document.getElementById("resetBtn");
+            const gooeyToggle = document.getElementById("gooeyToggle");
+            const intensityRadios = document.querySelectorAll(
+              'input[name="gooeyIntensity"]'
+            );
+
+            // Pattern selection
+            patternSelect.addEventListener("change", (e) => {
+              const pattern = e.target.value;
+              updatePatternVariantsUI(pattern);
+              updatePattern(pattern);
+            });
+
+            // Slider updates
+            countInput.addEventListener("input", (e) => {
+              const count = parseInt(e.target.value);
+              countValue.textContent = count;
+              engine.updateConfig({ count });
+            });
+
+            sizeInput.addEventListener("input", (e) => {
+              const size = parseInt(e.target.value);
+              sizeValue.textContent = size;
+              engine.updateConfig({ size });
+            });
+
+            speedInput.addEventListener("input", (e) => {
+              const speed = parseFloat(e.target.value);
+              speedValue.textContent = speed;
+              engine.updateConfig({ speed });
+            });
+
+            attractionInput.addEventListener("input", (e) => {
+              const attraction = parseFloat(e.target.value);
+              attractionValue.textContent = attraction;
+              engine.updateConfig({ attraction });
+            });
+
+            repulsionInput.addEventListener("input", (e) => {
+              const repulsion = parseFloat(e.target.value);
+              repulsionValue.textContent = repulsion;
+              engine.updateConfig({ repulsion });
+            });
+
+            colorPicker.addEventListener("input", (e) => {
+              const color = e.target.value;
+              engine.updateConfig({ colors: [color] });
+            });
+
+            // Gooey effect controls
+            gooeyToggle.addEventListener("change", (e) => {
+              engine.updateConfig({ gooey: e.target.checked });
+            });
+
+            intensityRadios.forEach((radio) => {
+              radio.addEventListener("change", (e) => {
+                if (e.target.checked) {
+                  engine.updateConfig({ gooeyIntensity: e.target.value });
+                }
+              });
+            });
+
+            // Button controls
+            pauseBtn.addEventListener("click", () => {
+              engine.pause();
+              pauseBtn.disabled = true;
+              resumeBtn.disabled = false;
+            });
+
+            resumeBtn.addEventListener("click", () => {
+              engine.resume();
+              pauseBtn.disabled = false;
+              resumeBtn.disabled = true;
+            });
+
+            resetBtn.addEventListener("click", () => {
+              const defaultConfig = {
+                count: 5,
+                size: 20,
+                speed: 1,
+                colors: ["#4a6cf7"],
+                gooey: true,
+                gooeyIntensity: "medium",
+                attraction: 0.5,
+                repulsion: 0.3,
+                state: "chaos",
+                variant: "default",
+              };
+
+              engine.updateConfig(defaultConfig);
+              updatePattern("chaos", "default");
+
+              // Reset controls
+              patternSelect.value = "chaos";
+              updatePatternVariantsUI("chaos");
+              countInput.value = 5;
+              countValue.textContent = 5;
+              sizeInput.value = 20;
+              sizeValue.textContent = 20;
+              speedInput.value = 1;
+              speedValue.textContent = 1;
+              attractionInput.value = 0.5;
+              attractionValue.textContent = 0.5;
+              repulsionInput.value = 0.3;
+              repulsionValue.textContent = 0.3;
+              colorPicker.value = "#4a6cf7";
+              gooeyToggle.checked = true;
+              document.getElementById("intensityMedium").checked = true;
+
+              // Make sure animation is running
+              engine.resume();
+              pauseBtn.disabled = false;
+              resumeBtn.disabled = true;
+            });
+
+            // Handle window resize
+            window.addEventListener("resize", () => {
+              canvas.width = demoContainer.clientWidth;
+              canvas.height = demoContainer.clientHeight;
+              engine.updateConfig({
+                width: canvas.width,
+                height: canvas.height,
+              });
+            });
+          } catch (error) {
+            showError(`Failed to initialize demo: ${error.message}`);
+            console.error("Detailed initialization error:", error);
+          }
+        });
+      } catch (error) {
+        showError(`Failed to load library: ${error.message}`);
+        console.error("Detailed library loading error:", error);
+      }
+    </script>
+  </body>
+</html>

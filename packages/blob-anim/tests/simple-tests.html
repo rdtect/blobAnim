@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blob Animation Library - Basic Tests</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    
+    .test-section {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      border: 1px solid #eaeaea;
+      border-radius: 8px;
+    }
+    
+    .test-container {
+      margin-bottom: 1rem;
+    }
+    
+    .test-title {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .test-output {
+      background-color: #f5f5f5;
+      padding: 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .success {
+      color: #22c55e;
+    }
+    
+    .failure {
+      color: #ef4444;
+    }
+    
+    .test-blob {
+      width: 300px;
+      height: 200px;
+      border: 1px solid #eaeaea;
+      margin-bottom: 1rem;
+    }
+    
+    .flex {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    
+    .status-count {
+      font-weight: bold;
+    }
+    
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    button:hover {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <h1>Blob Animation Library - Tests</h1>
+  
+  <div class="status-bar">
+    <div>
+      <span>Status: </span>
+      <span id="test-status">Running tests...</span>
+    </div>
+    <div>
+      <span class="status-count" id="pass-count">0</span> passed,
+      <span class="status-count" id="fail-count">0</span> failed
+    </div>
+    <button id="run-all-tests">Run All Tests</button>
+  </div>
+  
+  <div id="test-results"></div>
+  
+  <h2>Manual Visual Tests</h2>
+  
+  <div class="flex">
+    <div>
+      <div class="test-title">Chaos Pattern</div>
+      <div class="test-blob">
+        <blob-element
+          id="chaosBlob"
+          count="20"
+          speed="1"
+          state="chaos"
+          variant="default"
+          colors='["#3b82f6"]'
+        ></blob-element>
+      </div>
+    </div>
+    
+    <div>
+      <div class="test-title">Organizing Pattern</div>
+      <div class="test-blob">
+        <blob-element
+          id="organizingBlob"
+          count="20"
+          speed="1"
+          state="organizing"
+          variant="default"
+          colors='["#f59e0b"]'
+        ></blob-element>
+      </div>
+    </div>
+    
+    <div>
+      <div class="test-title">Structured Pattern</div>
+      <div class="test-blob">
+        <blob-element
+          id="structuredBlob"
+          count="20"
+          speed="1"
+          state="structured"
+          variant="default"
+          colors='["#10b981"]'
+        ></blob-element>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    import '../blob-anim.es.js';
+    
+    const testResults = document.getElementById('test-results');
+    const testStatus = document.getElementById('test-status');
+    const passCount = document.getElementById('pass-count');
+    const failCount = document.getElementById('fail-count');
+    const runAllTestsBtn = document.getElementById('run-all-tests');
+    
+    let passed = 0;
+    let failed = 0;
+    
+    function createTestSection(title) {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      
+      const titleEl = document.createElement('h3');
+      titleEl.textContent = title;
+      section.appendChild(titleEl);
+      
+      return section;
+    }
+    
+    function createTestContainer(name) {
+      const container = document.createElement('div');
+      container.className = 'test-container';
+      
+      const titleEl = document.createElement('div');
+      titleEl.className = 'test-title';
+      titleEl.textContent = name;
+      container.appendChild(titleEl);
+      
+      const output = document.createElement('div');
+      output.className = 'test-output';
+      container.appendChild(output);
+      
+      return { container, output };
+    }
+    
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message || "Assertion failed");
+      }
+    }
+    
+    async function runTest(name, section, fn) {
+      const { container, output } = createTestContainer(name);
+      section.appendChild(container);
+      
+      try {
+        const result = await fn(output);
+        output.innerHTML += `<div class="success">✓ Test passed</div>`;
+        passed++;
+        return true;
+      } catch (error) {
+        output.innerHTML += `<div class="failure">✗ Test failed: ${error.message}</div>`;
+        failed++;
+        return false;
+      } finally {
+        updateStatus();
+      }
+    }
+    
+    function updateStatus() {
+      passCount.textContent = passed;
+      failCount.textContent = failed;
+      
+      if (failed > 0) {
+        testStatus.textContent = 'Some tests failed';
+        testStatus.className = 'failure';
+      } else if (passed > 0) {
+        testStatus.textContent = 'All tests passed';
+        testStatus.className = 'success';
+      } else {
+        testStatus.textContent = 'No tests run';
+        testStatus.className = '';
+      }
+    }
+    
+    function log(output, message) {
+      output.innerHTML += `${message}<br>`;
+    }
+    
+    async function runAllTests() {
+      // Reset counters
+      passed = 0;
+      failed = 0;
+      testResults.innerHTML = '';
+      testStatus.textContent = 'Running tests...';
+      testStatus.className = '';
+      
+      // Component Initialization Tests
+      const initSection = createTestSection('Component Initialization');
+      testResults.appendChild(initSection);
+      
+      await runTest('Create blob-element', initSection, async (output) => {
+        log(output, "Creating new blob-element...");
+        const blob = document.createElement('blob-element');
+        
+        log(output, "Checking if component initialized correctly...");
+        assert(blob !== null, "Component should be created");
+        assert(typeof blob.pause === 'function', "pause method should exist");
+        assert(typeof blob.resume === 'function', "resume method should exist");
+        assert(typeof blob.getPerformanceMetrics === 'function', "getPerformanceMetrics method should exist");
+        
+        log(output, "Success: Component initialized correctly");
+        return true;
+      });
+      
+      await runTest('Attribute handling', initSection, async (output) => {
+        log(output, "Creating blob with attributes...");
+        const blob = document.createElement('blob-element');
+        document.body.appendChild(blob);
+        
+        log(output, "Setting attributes...");
+        blob.setAttribute('count', '30');
+        blob.setAttribute('speed', '1.5');
+        blob.setAttribute('state', 'chaos');
+        
+        // Wait for attributes to be processed
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        document.body.removeChild(blob);
+        log(output, "Success: Attributes handled correctly");
+        return true;
+      });
+      
+      // Pattern Implementation Tests
+      const patternSection = createTestSection('Pattern Implementations');
+      testResults.appendChild(patternSection);
+      
+      await runTest('Organizing Pattern Test', patternSection, async (output) => {
+        log(output, "Testing organizing pattern...");
+        
+        const blob = document.createElement('blob-element');
+        blob.setAttribute('state', 'organizing');
+        blob.setAttribute('count', '10');
+        document.body.appendChild(blob);
+        
+        // Let it animate for a bit
+        log(output, "Letting the pattern animate...");
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        document.body.removeChild(blob);
+        log(output, "Success: Organizing pattern works without errors");
+        return true;
+      });
+      
+      await runTest('Structured Pattern Test', patternSection, async (output) => {
+        log(output, "Testing structured pattern...");
+        
+        const blob = document.createElement('blob-element');
+        blob.setAttribute('state', 'structured');
+        blob.setAttribute('count', '10');
+        document.body.appendChild(blob);
+        
+        // Let it animate for a bit
+        log(output, "Letting the pattern animate...");
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        document.body.removeChild(blob);
+        log(output, "Success: Structured pattern works without errors");
+        return true;
+      });
+      
+      // Performance & Core Tests
+      const perfSection = createTestSection('Performance & Core Features');
+      testResults.appendChild(perfSection);
+      
+      await runTest('Performance Metrics', perfSection, async (output) => {
+        log(output, "Testing performance metrics...");
+        
+        const blob = document.createElement('blob-element');
+        document.body.appendChild(blob);
+        
+        // Let it animate for a bit
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Get performance metrics
+        const metrics = blob.getPerformanceMetrics();
+        log(output, `Current FPS: ${metrics.fps.toFixed(1)}`);
+        
+        assert(typeof metrics.fps === 'number', "FPS should be a number");
+        assert(metrics.fps > 0, "FPS should be positive");
+        
+        document.body.removeChild(blob);
+        log(output, "Success: Performance metrics accessible");
+        return true;
+      });
+      
+      await runTest('Pause and Resume', perfSection, async (output) => {
+        log(output, "Testing pause and resume functionality...");
+        
+        const blob = document.createElement('blob-element');
+        document.body.appendChild(blob);
+        
+        // Let it animate
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Pause
+        log(output, "Pausing animation...");
+        blob.pause();
+        
+        // Wait a bit
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Resume
+        log(output, "Resuming animation...");
+        blob.resume();
+        
+        // Wait a bit more
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        document.body.removeChild(blob);
+        log(output, "Success: Pause and resume functions work");
+        return true;
+      });
+      
+      // Event System Tests
+      const eventSection = createTestSection('Event System');
+      testResults.appendChild(eventSection);
+      
+      await runTest('Event Listeners', eventSection, async (output) => {
+        log(output, "Testing event system...");
+        
+        const blob = document.createElement('blob-element');
+        document.body.appendChild(blob);
+        
+        // Track events
+        let configChangeReceived = false;
+        
+        // Add event listener
+        blob.addEventListener('blob:configChange', () => {
+          configChangeReceived = true;
+          log(output, "Received config change event");
+        });
+        
+        // Trigger a config change
+        log(output, "Changing configuration...");
+        blob.setAttribute('count', '40');
+        
+        // Wait for event to fire
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Check if we received the event
+        assert(configChangeReceived, "Should have received config change event");
+        
+        document.body.removeChild(blob);
+        log(output, "Success: Event system works correctly");
+        return true;
+      });
+      
+      // Visibility Tests
+      const visibilitySection = createTestSection('Visibility Handling');
+      testResults.appendChild(visibilitySection);
+      
+      await runTest('Visibility Observer', visibilitySection, async (output) => {
+        log(output, "Testing visibility handling...");
+        
+        // This test is more about ensuring the code doesn't error
+        // since we can't easily test IntersectionObserver directly
+        
+        const blob = document.createElement('blob-element');
+        document.body.appendChild(blob);
+        
+        // Element is visible
+        log(output, "Element is visible");
+        
+        // Hide element
+        log(output, "Hiding element...");
+        blob.style.display = 'none';
+        
+        // Wait a bit
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Show element again
+        log(output, "Showing element...");
+        blob.style.display = 'block';
+        
+        // Wait a bit more
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        document.body.removeChild(blob);
+        log(output, "Success: Visibility handling works without errors");
+        return true;
+      });
+      
+      // Lifecycle Tests
+      const lifecycleSection = createTestSection('Component Lifecycle');
+      testResults.appendChild(lifecycleSection);
+      
+      await runTest('Disconnect and Reconnect', lifecycleSection, async (output) => {
+        log(output, "Testing component lifecycle...");
+        
+        const blob = document.createElement('blob-element');
+        document.body.appendChild(blob);
+        
+        // Let it initialize
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Remove from DOM
+        log(output, "Removing element from DOM...");
+        document.body.removeChild(blob);
+        
+        // Wait a bit
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Add back to DOM
+        log(output, "Adding element back to DOM...");
+        document.body.appendChild(blob);
+        
+        // Wait a bit more
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Final cleanup
+        document.body.removeChild(blob);
+        log(output, "Success: Element handles disconnect/reconnect correctly");
+        return true;
+      });
+      
+      updateStatus();
+    }
+    
+    // Run tests automatically
+    runAllTests();
+    
+    // Allow re-running tests
+    runAllTestsBtn.addEventListener('click', runAllTests);
+  </script>
+</body>
+</html>

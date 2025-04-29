@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlobAnim Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    
+    .animation-container {
+      flex: 1;
+      display: flex;
+    }
+    
+    .animation {
+      flex: 1;
+      border: 1px solid #ccc;
+      margin: 10px;
+    }
+    
+    .controls {
+      padding: 10px;
+      background-color: #f0f0f0;
+      border-top: 1px solid #ccc;
+    }
+    
+    .control-group {
+      margin-bottom: 10px;
+    }
+    
+    label {
+      display: inline-block;
+      width: 100px;
+    }
+    
+    select, input {
+      width: 150px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="animation-container">
+      <div id="animation1" class="animation"></div>
+      <div id="animation2" class="animation"></div>
+      <div id="animation3" class="animation"></div>
+    </div>
+    
+    <div class="controls">
+      <div class="control-group">
+        <label for="state">State:</label>
+        <select id="state">
+          <option value="chaos">Chaos</option>
+          <option value="organizing">Organizing</option>
+          <option value="structured">Structured</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label for="variant">Variant:</label>
+        <select id="variant">
+          <option value="default">Default</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label for="count">Count:</label>
+        <input type="range" id="count" min="1" max="25" value="10">
+        <span id="count-value">10</span>
+      </div>
+      
+      <div class="control-group">
+        <label for="size">Size:</label>
+        <input type="range" id="size" min="5" max="100" value="40">
+        <span id="size-value">40</span>
+      </div>
+      
+      <div class="control-group">
+        <label for="speed">Speed:</label>
+        <input type="range" id="speed" min="0.1" max="10" step="0.1" value="5">
+        <span id="speed-value">5</span>
+      </div>
+      
+      <div class="control-group">
+        <label for="intensity">Intensity:</label>
+        <input type="range" id="intensity" min="0" max="1" step="0.01" value="0.5">
+        <span id="intensity-value">0.5</span>
+      </div>
+      
+      <div class="control-group">
+        <label for="gooey">Gooey:</label>
+        <select id="gooey">
+          <option value="none">None</option>
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="strong">Strong</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label for="color">Color:</label>
+        <input type="color" id="color" value="#3b82f6">
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    import { createAnim } from './index.js';
+    
+    // Define variants for each state
+    const variants = {
+      chaos: ['default', 'random', 'brownian', 'explosion', 'math-brownian', 'math-explosion', 'math', 'circle'],
+      organizing: ['default', 'grid', 'spiral', 'wave', 'cylinder'],
+      structured: ['default', 'grid', 'circle', 'orbit', 'flower', 'basic']
+    };
+    
+    // Create animations
+    const animation1 = createAnim(document.getElementById('animation1'), {
+      animationState: 'chaos',
+      variant: 'default'
+    });
+    
+    const animation2 = createAnim(document.getElementById('animation2'), {
+      animationState: 'organizing',
+      variant: 'default'
+    });
+    
+    const animation3 = createAnim(document.getElementById('animation3'), {
+      animationState: 'structured',
+      variant: 'default'
+    });
+    
+    // Get controls
+    const stateSelect = document.getElementById('state');
+    const variantSelect = document.getElementById('variant');
+    const countInput = document.getElementById('count');
+    const countValue = document.getElementById('count-value');
+    const sizeInput = document.getElementById('size');
+    const sizeValue = document.getElementById('size-value');
+    const speedInput = document.getElementById('speed');
+    const speedValue = document.getElementById('speed-value');
+    const intensityInput = document.getElementById('intensity');
+    const intensityValue = document.getElementById('intensity-value');
+    const gooeySelect = document.getElementById('gooey');
+    const colorInput = document.getElementById('color');
+    
+    // Update variant options when state changes
+    stateSelect.addEventListener('change', () => {
+      const state = stateSelect.value;
+      const stateVariants = variants[state];
+      
+      // Clear existing options
+      variantSelect.innerHTML = '';
+      
+      // Add new options
+      stateVariants.forEach(variant => {
+        const option = document.createElement('option');
+        option.value = variant;
+        option.textContent = variant;
+        variantSelect.appendChild(option);
+      });
+      
+      // Update animations
+      updateAnimations();
+    });
+    
+    // Update animations when controls change
+    variantSelect.addEventListener('change', updateAnimations);
+    countInput.addEventListener('input', () => {
+      countValue.textContent = countInput.value;
+      updateAnimations();
+    });
+    sizeInput.addEventListener('input', () => {
+      sizeValue.textContent = sizeInput.value;
+      updateAnimations();
+    });
+    speedInput.addEventListener('input', () => {
+      speedValue.textContent = speedInput.value;
+      updateAnimations();
+    });
+    intensityInput.addEventListener('input', () => {
+      intensityValue.textContent = intensityInput.value;
+      updateAnimations();
+    });
+    gooeySelect.addEventListener('change', updateAnimations);
+    colorInput.addEventListener('change', updateAnimations);
+    
+    // Update animations with current control values
+    function updateAnimations() {
+      const config = {
+        animationState: stateSelect.value,
+        variant: variantSelect.value,
+        count: parseInt(countInput.value),
+        size: parseInt(sizeInput.value),
+        speed: parseFloat(speedInput.value),
+        intensity: parseFloat(intensityInput.value),
+        gooeyIntensity: gooeySelect.value,
+        color: colorInput.value
+      };
+      
+      // Update all animations
+      animation1.updateConfig(config);
+      animation2.updateConfig(config);
+      animation3.updateConfig(config);
+    }
+    
+    // Initialize variant select
+    stateSelect.dispatchEvent(new Event('change'));
+  </script>
+</body>
+</html>

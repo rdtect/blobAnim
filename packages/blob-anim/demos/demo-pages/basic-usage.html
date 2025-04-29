@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../blob-anim-demo.css" />
+  <title>BlobAnim Basic Usage</title>
+</head>
+<body>
+  <div class="header">
+    <h1>BlobAnim Basic Usage</h1>
+    <a href="../index.html">Back to Main Demo</a>
+  </div>
+  <div class="layout">
+    <div class="card">
+      <div class="card-header">Basic Usage</div>
+      <div class="card-body">
+        <p>
+          The BlobAnim library can be used easily in any project with D3.js as
+          a dependency.
+        </p>
+
+        <h3>1. Load the scripts</h3>
+        <div class="code-sample">
+          <span class="element">&lt;script</span>
+          <span class="attribute">src</span>=<span class="value"
+            >"https://d3js.org/d3.v7.min.js"</span
+          ><span class="element">&gt;&lt;/script&gt;</span>
+          <span class="element">&lt;script type=\"module\" src=\"blob-anim.es.js\"&gt;&lt;/script&gt;</span>
+        </div>
+
+        <h3>2. Use as a Web Component</h3>
+        <div class="code-sample">
+          <span class="element">&lt;blob-element</span>
+          <span class="attribute">count</span>=<span class="value">"5"</span>
+          <span class="attribute">colors</span>=<span class="value"
+            >'["#3b82f6"]'</span
+          >
+          <span class="attribute">state</span>=<span class="value"
+            >"chaos"</span
+          >
+          <span class="attribute">variant</span>=<span class="value"
+            >"spiral"</span
+          >
+          <span class="attribute">gooey</span>
+          <span class="element">&gt;&lt;/blob-element&gt;</span>
+        </div>
+
+        <div class="animation-container">
+          <blob-element
+            id="basic-demo"
+            class="svgCanvas"
+            count="5"
+            colors='["#3b82f6"]'
+            state="chaos"
+            variant="spiral"
+            gooey
+          ></blob-element>
+        </div>
+
+        <h3>3. Or use the JavaScript API</h3>
+        <div class="code-sample">
+          <span class="keyword">const</span> container =
+          <span class="keyword">document</span>.getElementById(<span
+            class="string"
+            >'animation-container'</span
+          >); <span class="keyword">const</span> animation =
+          createAnim(container, { count:
+          <span class="number">5</span>, colors:
+          <span class="string">['#10b981']</span>, state:
+          <span class="string">'organizing'</span>, variant:
+          <span class="string">'wave'</span>, gooey:
+          <span class="keyword">true</span>, width:
+          <span class="number">350</span>, height:
+          <span class="number">350</span>
+          });
+
+          <span class="comment">// Control methods</span>
+          animation.pause(); animation.resume();
+
+          <span class="comment">// Update configuration</span>
+          animation.update({ count: <span class="number">5</span>, colors:
+          <span class="string">['#10b981']</span>
+          });
+
+          <span class="comment">// Clean up resources</span>
+          animation.destroy();
+        </div>
+
+        <h3>Live JavaScript API Example</h3>
+        <div class="animation-container" id="js-animation"></div>
+        <div class="button-group">
+          <button id="js-pause-btn">Pause</button>
+          <button id="js-resume-btn" disabled>Resume</button>
+          <button id="js-resize-btn">Resize</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module">
+    import { initBasicUsageDemo } from '../demo-scripts/main.js';
+    document.addEventListener('DOMContentLoaded', initBasicUsageDemo);
+  </script>
+</body>
+</html>

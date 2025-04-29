@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BlobAnim Minimal Test</title>
+  <script type="module" src="../blob-anim.es.js"></script>
+  <style>
+    body { background: #f0f4f8; display: flex; align-items: center; justify-content: center; height: 100vh; }
+    blob-element { width: 400px; height: 400px; display: block; }
+  </style>
+</head>
+<body>
+  <blob-element
+    count="8"
+    size="30"
+    state="chaos"
+    variant="spiral"
+    speed="2.5"
+    colors='["#3b82f6"]'
+    gooey
+  ></blob-element>
+  <blob-element
+    count="5"
+    size="20"
+    state="organizing"
+    variant="spiral"
+    speed="2.5"
+    colors='["#3b82f6"]'
+    gooey
+  ></blob-element>
+</body>
+</html>

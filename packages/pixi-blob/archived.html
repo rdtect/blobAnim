@@ -1,0 +1,235 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PIXI Blob Animation Demo</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #1a1a1a;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .canvas-container {
+        position: relative;
+        width: 800px;
+        height: 600px;
+        background: #2a2a2a;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+      }
+      .controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 8px;
+        color: white;
+        font-family: Arial, sans-serif;
+        z-index: 1;
+      }
+      .control-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      select,
+      input,
+      button {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        background: #333;
+        color: white;
+        border: none;
+        border-radius: 4px;
+      }
+      button:hover {
+        background: #444;
+      }
+      .value-display {
+        display: inline-block;
+        min-width: 30px;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="canvas-container">
+      <div class="controls">
+        <div class="control-group">
+          <label for="variant">Variant:</label>
+          <select id="variant">
+            <option value="spiral">Spiral</option>
+            <option value="random">Random</option>
+            <option value="circle">Circle</option>
+            <option value="brownian">Brownian</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="state">State:</label>
+          <select id="state">
+            <option value="chaos">Chaos</option>
+            <option value="structured">Structured</option>
+            <option value="organizing">Organizing</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="speed"
+            >Speed:
+            <span class="value-display" id="speedValue">1.0</span></label
+          >
+          <input
+            type="range"
+            id="speed"
+            min="0.1"
+            max="5"
+            step="0.1"
+            value="1"
+          />
+        </div>
+        <div class="control-group">
+          <label for="size"
+            >Size: <span class="value-display" id="sizeValue">30</span></label
+          >
+          <input type="range" id="size" min="5" max="100" step="1" value="30" />
+        </div>
+        <div class="control-group">
+          <label for="count"
+            >Count: <span class="value-display" id="countValue">5</span></label
+          >
+          <input type="range" id="count" min="1" max="25" step="1" value="5" />
+        </div>
+        <div class="control-group">
+          <label>
+            <input type="checkbox" id="gooey" checked />
+            Gooey Effect
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load PIXI from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.0.0/dist/pixi.min.js"></script>
+    
+    <!-- Load our library -->
+    <script src="./dist/pixi-blob.js"></script>
+    
+    <script>
+      // Wait for DOM to be ready
+      document.addEventListener('DOMContentLoaded', () => {
+        // Get canvas container
+        const container = document.querySelector('.canvas-container');
+        
+        // Set up PIXI Application
+        const app = new PIXI.Application();
+        app.init({
+          width: container.clientWidth,
+          height: container.clientHeight,
+          backgroundColor: 0x2a2a2a,
+          antialias: true,
+          resolution: window.devicePixelRatio || 1
+        });
+        
+        // Add canvas to container
+        container.appendChild(app.canvas);
+        
+        // Create blob container
+        const blob = new PixiBlob.BlobContainer({
+          count: 5,
+          size: 30,
+          speed: 1,
+          variant: 'spiral',
+          state: 'chaos',
+          gooey: true
+        });
+        
+        // Add to stage
+        app.stage.addChild(blob);
+        
+        // Center blob
+        blob.position.x = app.screen.width / 2;
+        blob.position.y = app.screen.height / 2;
+        
+        // Initialize with dimensions
+        blob.init(app.screen.width, app.screen.height);
+        
+        // Get controls
+        const controls = {
+          variant: document.getElementById('variant'),
+          state: document.getElementById('state'),
+          speed: document.getElementById('speed'),
+          size: document.getElementById('size'),
+          count: document.getElementById('count'),
+          gooey: document.getElementById('gooey'),
+          speedValue: document.getElementById('speedValue'),
+          sizeValue: document.getElementById('sizeValue'),
+          countValue: document.getElementById('countValue')
+        };
+        
+        // Handle control changes
+        controls.variant.addEventListener('change', () => {
+          blob.setVariant(controls.variant.value);
+        });
+        
+        controls.state.addEventListener('change', () => {
+          blob.setState(controls.state.value);
+        });
+        
+        controls.speed.addEventListener('input', () => {
+          const value = parseFloat(controls.speed.value);
+          blob.setSpeed(value);
+          controls.speedValue.textContent = value.toFixed(1);
+        });
+        
+        controls.size.addEventListener('input', () => {
+          const value = parseInt(controls.size.value);
+          blob.setSize(value);
+          controls.sizeValue.textContent = value.toString();
+        });
+        
+        controls.count.addEventListener('input', () => {
+          const value = parseInt(controls.count.value);
+          blob.setColors(Array(value).fill('#3b82f6'));
+          controls.countValue.textContent = value.toString();
+        });
+        
+        controls.gooey.addEventListener('change', () => {
+          blob.setGooey(controls.gooey.checked);
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+          const width = container.clientWidth;
+          const height = container.clientHeight;
+          
+          if (width > 0 && height > 0) {
+            app.renderer.resize(width, height);
+            blob.resize(width, height);
+            blob.position.x = width / 2;
+            blob.position.y = height / 2;
+          }
+        });
+        
+        // Animation loop - let PIXI ticker handle it
+        app.ticker.add(() => {
+          // Nothing needed here - blob will update itself
+        });
+        
+        // Expose for debugging
+        window.blob = blob;
+        window.pixiApp = app;
+      });
+    </script>
+  </body>
+</html>

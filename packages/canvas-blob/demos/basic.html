@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basic Canvas Blob Demo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .container {
+      width: 500px;
+      height: 500px;
+      position: relative;
+      background-color: #1a1a2e;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    }
+    canvas {
+      display: block;
+    }
+    .controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      min-width: 200px;
+    }
+    .controls h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .control {
+      margin-bottom: 10px;
+    }
+    .control label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    .control input {
+      width: 100%;
+    }
+    .value {
+      display: inline-block;
+      width: 30px;
+      text-align: right;
+      font-weight: bold;
+      color: #4a6cf7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <canvas id="blobCanvas"></canvas>
+    
+    <div class="controls">
+      <h3>Blob Controls</h3>
+      
+      <div class="control">
+        <label>Count: <span class="value" id="countValue">5</span></label>
+        <input type="range" id="countSlider" min="1" max="10" value="5" step="1">
+      </div>
+      
+      <div class="control">
+        <label>Size: <span class="value" id="sizeValue">30</span></label>
+        <input type="range" id="sizeSlider" min="10" max="80" value="30" step="1">
+      </div>
+      
+      <div class="control">
+        <label>Speed: <span class="value" id="speedValue">1.0</span></label>
+        <input type="range" id="speedSlider" min="0.1" max="3" value="1" step="0.1">
+      </div>
+      
+      <div class="control">
+        <label>Color:</label>
+        <input type="color" id="colorPicker" value="#4a6cf7">
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Get canvas and context
+    const canvas = document.getElementById('blobCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    function resizeCanvas() {
+      const container = canvas.parentElement;
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    }
+    
+    // Initialize canvas size
+    resizeCanvas();
+    
+    // Configuration
+    let config = {
+      count: 5,
+      size: 30,
+      speed: 1,
+      color: '#4a6cf7'
+    };
+    
+    // Blob points
+    let blobs = [];
+    
+    // Initialize blobs
+    function initBlobs() {
+      blobs = [];
+      for (let i = 0; i < config.count; i++) {
+        blobs.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: config.size * (0.8 + Math.random() * 0.4),
+          velocityX: (Math.random() - 0.5) * 2 * config.speed,
+          velocityY: (Math.random() - 0.5) * 2 * config.speed
+        });
+      }
+    }
+    
+    // Animation loop
+    function animate() {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Update and draw each blob
+      for (let i = 0; i < blobs.length; i++) {
+        const blob = blobs[i];
+        
+        // Update position
+        blob.x += blob.velocityX;
+        blob.y += blob.velocityY;
+        
+        // Boundary checks
+        if (blob.x < blob.radius || blob.x > canvas.width - blob.radius) {
+          blob.velocityX *= -1;
+        }
+        if (blob.y < blob.radius || blob.y > canvas.height - blob.radius) {
+          blob.velocityY *= -1;
+        }
+        
+        // Pulse effect
+        const pulseFactor = 1 + 0.2 * Math.sin(Date.now() * 0.002 + i);
+        const currentRadius = blob.radius * pulseFactor;
+        
+        // Draw blob
+        ctx.beginPath();
+        ctx.arc(blob.x, blob.y, currentRadius, 0, Math.PI * 2);
+        ctx.fillStyle = config.color;
+        ctx.fill();
+      }
+      
+      // Draw connections between close blobs for a gooey-like effect
+      ctx.globalAlpha = 0.4;
+      for (let i = 0; i < blobs.length; i++) {
+        const blob1 = blobs[i];
+        
+        for (let j = i + 1; j < blobs.length; j++) {
+          const blob2 = blobs[j];
+          
+          // Calculate distance between blobs
+          const dx = blob2.x - blob1.x;
+          const dy = blob2.y - blob1.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // Draw connection if close enough
+          const maxDistance = blob1.radius + blob2.radius + 60;
+          if (distance < maxDistance) {
+            // Calculate width based on distance
+            const lineWidth = 2 * (1 - distance / maxDistance) * Math.min(blob1.radius, blob2.radius);
+            
+            // Draw connection
+            ctx.beginPath();
+            ctx.moveTo(blob1.x, blob1.y);
+            ctx.lineTo(blob2.x, blob2.y);
+            ctx.strokeStyle = config.color;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+          }
+        }
+      }
+      ctx.globalAlpha = 1.0;
+      
+      // Continue animation
+      requestAnimationFrame(animate);
+    }
+    
+    // Set up UI controls
+    const countSlider = document.getElementById('countSlider');
+    const countValue = document.getElementById('countValue');
+    const sizeSlider = document.getElementById('sizeSlider');
+    const sizeValue = document.getElementById('sizeValue');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedValue = document.getElementById('speedValue');
+    const colorPicker = document.getElementById('colorPicker');
+    
+    countSlider.addEventListener('input', () => {
+      config.count = parseInt(countSlider.value);
+      countValue.textContent = config.count;
+      initBlobs();
+    });
+    
+    sizeSlider.addEventListener('input', () => {
+      config.size = parseInt(sizeSlider.value);
+      sizeValue.textContent = config.size;
+      initBlobs();
+    });
+    
+    speedSlider.addEventListener('input', () => {
+      config.speed = parseFloat(speedSlider.value);
+      speedValue.textContent = config.speed.toFixed(1);
+      
+      // Update velocities of existing blobs
+      blobs.forEach(blob => {
+        const speedFactor = config.speed / Math.sqrt(blob.velocityX * blob.velocityX + blob.velocityY * blob.velocityY);
+        blob.velocityX *= speedFactor;
+        blob.velocityY *= speedFactor;
+      });
+    });
+    
+    colorPicker.addEventListener('input', () => {
+      config.color = colorPicker.value;
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+    });
+    
+    // Start the animation
+    initBlobs();
+    animate();
+  </script>
+</body>
+</html> 

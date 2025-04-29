@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlobAnim Web Component Demo</title>
+    <style>
+      :root {
+        --primary: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --purple: #8b5cf6;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 2rem;
+        background-color: #f8fafc;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      h1 {
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .subtitle {
+        color: #64748b;
+        font-weight: normal;
+      }
+
+      .demo-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+
+      @media (max-width: 768px) {
+        .demo-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+
+      .card-header {
+        padding: 1rem 1.5rem;
+        background-color: #f1f5f9;
+        font-weight: 500;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .metrics {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        background-color: #e2e8f0;
+        color: #334155;
+      }
+
+      .card-body {
+        padding: 1.5rem;
+      }
+
+      blob-anim {
+        display: block;
+        width: 100%;
+        height: 400px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      @media (max-width: 480px) {
+        .controls {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .control {
+        margin-bottom: 1rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+        color: #334155;
+      }
+
+      .value {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-left: 0.5rem;
+        font-weight: normal;
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+      }
+
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        color: #334155;
+      }
+
+      .checkbox-label input {
+        margin-right: 0.5rem;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        background-color: var(--primary);
+        color: white;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      button:hover {
+        background-color: #2563eb;
+      }
+
+      button.warning {
+        background-color: var(--warning);
+      }
+
+      button.danger {
+        background-color: var(--danger);
+      }
+
+      button.success {
+        background-color: var(--success);
+      }
+
+      .presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .preset {
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        background-color: #f1f5f9;
+        color: #334155;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .preset:hover {
+        background-color: #e2e8f0;
+      }
+
+      .code-sample {
+        background-color: #1e293b;
+        color: #f1f5f9;
+        padding: 1.5rem;
+        border-radius: 8px;
+        font-family: monospace;
+        white-space: pre;
+        overflow-x: auto;
+        font-size: 0.875rem;
+        line-height: 1.6;
+      }
+
+      .code-sample .comment {
+        color: #94a3b8;
+      }
+      .code-sample .keyword {
+        color: #93c5fd;
+      }
+      .code-sample .string {
+        color: #86efac;
+      }
+      .code-sample .number {
+        color: #fdba74;
+      }
+      .code-sample .element {
+        color: #f472b6;
+      }
+      .code-sample .attribute {
+        color: #c4b5fd;
+      }
+      .code-sample .value {
+        color: #fbbf24;
+      }
+    </style>
+
+    <!-- Import web component directly -->
+    <script type="module" src="../blob-anim/web-component"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>BlobAnim Web Component Demo</h1>
+        <p class="subtitle">
+          A simple demonstration of using the blob-anim web component
+        </p>
+      </header>
+
+      <div class="demo-grid">
+        <!-- Left column: Animation preview -->
+        <section>
+          <div class="card">
+            <div class="card-header">
+              Animation Preview
+              <span class="metrics" id="fps-display">FPS: --</span>
+            </div>
+            <div class="card-body">
+              <!-- The blob-anim web component -->
+              <blob-anim
+                id="blob-demo"
+                count="10"
+                size="40"
+                speed="1"
+                state="chaos"
+                variant="default"
+                gooey
+              ></blob-anim>
+
+              <div class="button-group">
+                <button id="pause-btn">Pause</button>
+                <button id="resume-btn" disabled>Resume</button>
+                <button class="warning" id="reset-btn">Reset</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right column: Controls -->
+        <section>
+          <div class="card">
+            <div class="card-header">Configuration</div>
+            <div class="card-body">
+              <div class="presets">
+                <div class="preset" data-preset="calm">Calm</div>
+                <div class="preset" data-preset="energetic">Energetic</div>
+                <div class="preset" data-preset="playful">Playful</div>
+                <div class="preset" data-preset="organized">Organized</div>
+                <div class="preset" data-preset="chaotic">Chaotic</div>
+              </div>
+
+              <div class="controls">
+                <div class="control">
+                  <label for="count-slider"
+                    >Count <span id="count-value" class="value">10</span></label
+                  >
+                  <input
+                    type="range"
+                    id="count-slider"
+                    min="1"
+                    max="30"
+                    value="10"
+                  />
+                </div>
+
+                <div class="control">
+                  <label for="size-slider"
+                    >Size <span id="size-value" class="value">40</span></label
+                  >
+                  <input
+                    type="range"
+                    id="size-slider"
+                    min="10"
+                    max="100"
+                    value="40"
+                  />
+                </div>
+
+                <div class="control">
+                  <label for="speed-slider"
+                    >Speed
+                    <span id="speed-value" class="value">1.0</span></label
+                  >
+                  <input
+                    type="range"
+                    id="speed-slider"
+                    min="0.1"
+                    max="2"
+                    step="0.1"
+                    value="1"
+                  />
+                </div>
+
+                <div class="control">
+                  <label for="state-select">Animation State</label>
+                  <select id="state-select">
+                    <option value="chaos">Chaos</option>
+                    <option value="organizing">Organizing</option>
+                    <option value="structured">Structured</option>
+                  </select>
+                </div>
+
+                <div class="control">
+                  <label for="variant-select">Variant</label>
+                  <select id="variant-select">
+                    <option value="default">Default</option>
+                    <option value="circular">Circular</option>
+                    <option value="grid">Grid</option>
+                    <option value="wave">Wave</option>
+                  </select>
+                </div>
+
+                <div class="control">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="gooey-checkbox" checked />
+                    Gooey Effect
+                  </label>
+                </div>
+
+                <div class="control">
+                  <label class="checkbox-label">
+                    <input
+                      type="checkbox"
+                      id="scale-effects-checkbox"
+                      checked
+                    />
+                    Scale Effects
+                  </label>
+                </div>
+
+                <div class="control">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="glass-checkbox" />
+                    Glass Effect
+                  </label>
+                </div>
+              </div>
+
+              <h3>Code Example</h3>
+              <div class="code-sample" id="code-preview">
+                <span class="comment"
+                  ><!-- Code will be dynamically updated --></span
+                >
+                <span class="element">&lt;blob-anim</span>
+                <span class="attribute">count</span>=<span class="value"
+                  >"10"</span
+                >
+                <span class="attribute">size</span>=<span class="value"
+                  >"40"</span
+                >
+                <span class="attribute">speed</span>=<span class="value"
+                  >"1"</span
+                >
+                <span class="attribute">state</span>=<span class="value"
+                  >"chaos"</span
+                >
+                <span class="attribute">variant</span>=<span class="value"
+                  >"default"</span
+                >
+                <span class="attribute">gooey</span>
+                <span class="element">&gt;&lt;/blob-anim&gt;</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Get references to elements
+        const blobDemo = document.getElementById("blob-demo");
+        const fpsDisplay = document.getElementById("fps-display");
+        const pauseBtn = document.getElementById("pause-btn");
+        const resumeBtn = document.getElementById("resume-btn");
+        const resetBtn = document.getElementById("reset-btn");
+        const codePreview = document.getElementById("code-preview");
+
+        // Control elements
+        const countSlider = document.getElementById("count-slider");
+        const sizeSlider = document.getElementById("size-slider");
+        const speedSlider = document.getElementById("speed-slider");
+        const stateSelect = document.getElementById("state-select");
+        const variantSelect = document.getElementById("variant-select");
+        const gooeyCheckbox = document.getElementById("gooey-checkbox");
+        const scaleEffectsCheckbox = document.getElementById(
+          "scale-effects-checkbox"
+        );
+        const glassCheckbox = document.getElementById("glass-checkbox");
+
+        // Value displays
+        const countValue = document.getElementById("count-value");
+        const sizeValue = document.getElementById("size-value");
+        const speedValue = document.getElementById("speed-value");
+
+        // FPS counter update
+        function updateFps() {
+          if (blobDemo) {
+            try {
+              const metrics = blobDemo.getPerformanceMetrics();
+              fpsDisplay.textContent = `FPS: ${Math.round(metrics.fps)}`;
+            } catch (error) {
+              console.error("Error getting FPS:", error);
+            }
+          }
+        }
+
+        // Start FPS monitoring
+        const fpsInterval = setInterval(updateFps, 500);
+
+        // Update code preview
+        function updateCodePreview() {
+          let code = '<span class="element">&lt;blob-anim</span>\n';
+
+          code += `  <span class="attribute">count</span>=<span class="value">"${countSlider.value}"</span>\n`;
+          code += `  <span class="attribute">size</span>=<span class="value">"${sizeSlider.value}"</span>\n`;
+          code += `  <span class="attribute">speed</span>=<span class="value">"${speedSlider.value}"</span>\n`;
+          code += `  <span class="attribute">state</span>=<span class="value">"${stateSelect.value}"</span>\n`;
+          code += `  <span class="attribute">variant</span>=<span class="value">"${variantSelect.value}"</span>\n`;
+
+          if (gooeyCheckbox.checked) {
+            code += '  <span class="attribute">gooey</span>\n';
+          }
+
+          if (scaleEffectsCheckbox.checked) {
+            code += '  <span class="attribute">scale-effects</span>\n';
+          }
+
+          if (glassCheckbox.checked) {
+            code += '  <span class="attribute">glass</span>\n';
+          }
+
+          code += '<span class="element">&gt;&lt;/blob-anim&gt;</span>';
+
+          codePreview.innerHTML = code;
+        }
+
+        // Event listeners for controls
+        countSlider.addEventListener("input", () => {
+          countValue.textContent = countSlider.value;
+          blobDemo.setAttribute("count", countSlider.value);
+          updateCodePreview();
+        });
+
+        sizeSlider.addEventListener("input", () => {
+          sizeValue.textContent = sizeSlider.value;
+          blobDemo.setAttribute("size", sizeSlider.value);
+          updateCodePreview();
+        });
+
+        speedSlider.addEventListener("input", () => {
+          speedValue.textContent = speedSlider.value;
+          blobDemo.setAttribute("speed", speedSlider.value);
+          updateCodePreview();
+        });
+
+        stateSelect.addEventListener("change", () => {
+          blobDemo.setAttribute("state", stateSelect.value);
+          updateCodePreview();
+        });
+
+        variantSelect.addEventListener("change", () => {
+          blobDemo.setAttribute("variant", variantSelect.value);
+          updateCodePreview();
+        });
+
+        gooeyCheckbox.addEventListener("change", () => {
+          if (gooeyCheckbox.checked) {
+            blobDemo.setAttribute("gooey", "");
+          } else {
+            blobDemo.removeAttribute("gooey");
+          }
+          updateCodePreview();
+        });
+
+        scaleEffectsCheckbox.addEventListener("change", () => {
+          if (scaleEffectsCheckbox.checked) {
+            blobDemo.setAttribute("scale-effects", "");
+          } else {
+            blobDemo.removeAttribute("scale-effects");
+          }
+          updateCodePreview();
+        });
+
+        glassCheckbox.addEventListener("change", () => {
+          if (glassCheckbox.checked) {
+            blobDemo.setAttribute("glass", "");
+          } else {
+            blobDemo.removeAttribute("glass");
+          }
+          updateCodePreview();
+        });
+
+        // Pause and resume
+        pauseBtn.addEventListener("click", () => {
+          blobDemo.pause();
+          pauseBtn.disabled = true;
+          resumeBtn.disabled = false;
+        });
+
+        resumeBtn.addEventListener("click", () => {
+          blobDemo.resume();
+          pauseBtn.disabled = false;
+          resumeBtn.disabled = true;
+        });
+
+        // Reset
+        resetBtn.addEventListener("click", () => {
+          // Reset to defaults
+          countSlider.value = 10;
+          sizeSlider.value = 40;
+          speedSlider.value = 1;
+          stateSelect.value = "chaos";
+          variantSelect.value = "default";
+          gooeyCheckbox.checked = true;
+          scaleEffectsCheckbox.checked = true;
+          glassCheckbox.checked = false;
+
+          // Update value displays
+          countValue.textContent = countSlider.value;
+          sizeValue.textContent = sizeSlider.value;
+          speedValue.textContent = speedSlider.value;
+
+          // Apply to component
+          blobDemo.setAttribute("count", countSlider.value);
+          blobDemo.setAttribute("size", sizeSlider.value);
+          blobDemo.setAttribute("speed", speedSlider.value);
+          blobDemo.setAttribute("state", stateSelect.value);
+          blobDemo.setAttribute("variant", variantSelect.value);
+          blobDemo.setAttribute("gooey", "");
+          blobDemo.setAttribute("scale-effects", "");
+          blobDemo.removeAttribute("glass");
+
+          // Resume if paused
+          if (resumeBtn.disabled === false) {
+            blobDemo.resume();
+            pauseBtn.disabled = false;
+            resumeBtn.disabled = true;
+          }
+
+          updateCodePreview();
+        });
+
+        // Presets
+        document.querySelectorAll(".preset").forEach((preset) => {
+          preset.addEventListener("click", () => {
+            const presetName = preset.dataset.preset;
+
+            switch (presetName) {
+              case "calm":
+                blobDemo.setAttribute("count", "5");
+                blobDemo.setAttribute("size", "60");
+                blobDemo.setAttribute("speed", "0.5");
+                blobDemo.setAttribute("state", "structured");
+                blobDemo.setAttribute("variant", "circular");
+                blobDemo.setAttribute("gooey", "");
+
+                countSlider.value = 5;
+                sizeSlider.value = 60;
+                speedSlider.value = 0.5;
+                stateSelect.value = "structured";
+                variantSelect.value = "circular";
+                gooeyCheckbox.checked = true;
+                break;
+
+              case "energetic":
+                blobDemo.setAttribute("count", "20");
+                blobDemo.setAttribute("size", "30");
+                blobDemo.setAttribute("speed", "1.5");
+                blobDemo.setAttribute("state", "chaos");
+                blobDemo.setAttribute("variant", "default");
+
+                countSlider.value = 20;
+                sizeSlider.value = 30;
+                speedSlider.value = 1.5;
+                stateSelect.value = "chaos";
+                variantSelect.value = "default";
+                break;
+
+              case "playful":
+                blobDemo.setAttribute("count", "8");
+                blobDemo.setAttribute("size", "50");
+                blobDemo.setAttribute("speed", "1.2");
+                blobDemo.setAttribute("state", "organizing");
+                blobDemo.setAttribute("variant", "wave");
+
+                countSlider.value = 8;
+                sizeSlider.value = 50;
+                speedSlider.value = 1.2;
+                stateSelect.value = "organizing";
+                variantSelect.value = "wave";
+                break;
+
+              case "organized":
+                blobDemo.setAttribute("count", "16");
+                blobDemo.setAttribute("size", "35");
+                blobDemo.setAttribute("speed", "0.8");
+                blobDemo.setAttribute("state", "structured");
+                blobDemo.setAttribute("variant", "grid");
+
+                countSlider.value = 16;
+                sizeSlider.value = 35;
+                speedSlider.value = 0.8;
+                stateSelect.value = "structured";
+                variantSelect.value = "grid";
+                break;
+
+              case "chaotic":
+                blobDemo.setAttribute("count", "25");
+                blobDemo.setAttribute("size", "25");
+                blobDemo.setAttribute("speed", "1.8");
+                blobDemo.setAttribute("state", "chaos");
+                blobDemo.setAttribute("variant", "default");
+                blobDemo.removeAttribute("gooey");
+
+                countSlider.value = 25;
+                sizeSlider.value = 25;
+                speedSlider.value = 1.8;
+                stateSelect.value = "chaos";
+                variantSelect.value = "default";
+                gooeyCheckbox.checked = false;
+                break;
+            }
+
+            // Update value displays
+            countValue.textContent = countSlider.value;
+            sizeValue.textContent = sizeSlider.value;
+            speedValue.textContent = speedSlider.value;
+
+            updateCodePreview();
+          });
+        });
+
+        // Initial code preview update
+        updateCodePreview();
+      });
+    </script>
+  </body>
+</html>

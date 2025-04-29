@@ -1,0 +1,74 @@
+{
+  "name": "canvas-blob",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/canvas-blob.es.js",
+  "module": "./dist/canvas-blob.es.js",
+  "browser": "./dist/canvas-blob.es.js",
+  "unpkg": "./dist/canvas-blob.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/canvas-blob.es.js",
+      "require": "./dist/canvas-blob.es.js",
+      "browser": "./dist/canvas-blob.es.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "serve -s demos",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "d3": "^7.8.0",
+    "@types/d3": "^7.4.3",
+    "p5": "^1.4.2"
+  },
+  "devDependencies": {
+    "vite": "^4.5.13",
+    "serve": "^14.2.4",
+    "typescript": "^5.8.3",
+    "@types/p5": "^1.4.5"
+  },
+  "keywords": [
+    "animation",
+    "blob",
+    "canvas",
+    "d3",
+    "web-component",
+    "custom-element",
+    "metaball",
+    "gooey"
+  ],
+  "license": "MIT",
+  "customElements": {
+    "canvas-blob": {
+      "description": "Interactive blob animation element using Canvas rendering",
+      "attributes": [
+        "count",
+        "size",
+        "speed",
+        "state",
+        "variant",
+        "gooey",
+        "color",
+        "colors",
+        "opacity",
+        "scaleeffects",
+        "width",
+        "height",
+        "glass",
+        "glassblobs",
+        "chaosamount",
+        "sizefactor",
+        "gradient",
+        "debug"
+      ]
+    }
+  }
+}

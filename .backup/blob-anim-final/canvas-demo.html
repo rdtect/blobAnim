@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlobAnim Canvas Demo</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="simple.js"></script>
+    <script type="module" src="canvas.js"></script>
+    <script src="config.js"></script>
+    <style>
+      :root {
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
+        --secondary: #6366f1;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --purple: #8b5cf6;
+        --background: #f8fafc;
+        --text: #1e293b;
+        --border: #e2e8f0;
+        --card: #ffffff;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
+        background-color: var(--background);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .header {
+        background-color: var(--card);
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 10;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        color: var(--primary);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: minmax(300px, 600px) 1fr;
+        gap: 2rem;
+      }
+
+      .animation-container-wrapper {
+        resize: both;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .animation-container {
+        width: 100%;
+        height: 100%;
+        min-width: 300px;
+        min-height: 300px;
+        border-radius: 12px;
+        background-color: var(--card);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .controls-panel {
+        background-color: var(--card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .panel-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .control-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .control-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      select,
+      input[type="range"],
+      input[type="color"] {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background-color: #fff;
+        font-size: 0.9rem;
+      }
+
+      input[type="checkbox"] {
+        margin-right: 0.5rem;
+        transform: scale(1.2);
+      }
+
+      .checkbox-control {
+        display: flex;
+        align-items: center;
+      }
+
+      .value-display {
+        display: inline-block;
+        margin-left: 0.5rem;
+        background-color: var(--primary);
+        color: white;
+        padding: 0.1rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        min-width: 2rem;
+        text-align: center;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .action-button {
+        padding: 0.75rem 1.5rem;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        flex: 1;
+      }
+
+      .action-button:hover:not(:disabled) {
+        background-color: var(--primary-hover);
+      }
+
+      .action-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .render-switch {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: var(--background);
+        border-radius: 8px;
+      }
+
+      .render-switch button {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        background-color: var(--card);
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .render-switch button.active {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      .performance-panel {
+        background-color: var(--card);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .fps-display {
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .fps-value {
+        font-weight: 600;
+        color: var(--primary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>BlobAnim Canvas Demo</h1>
+    </div>
+
+    <div class="container">
+      <div class="render-switch">
+        <button id="svg-mode" class="active">SVG Mode</button>
+        <button id="canvas-mode">Canvas Mode</button>
+      </div>
+
+      <div class="main-content">
+        <div class="animation-container-wrapper" id="container-wrapper">
+          <div id="animation-container" class="animation-container"></div>
+        </div>
+
+        <div class="controls-panel">
+          <h2 class="panel-title">Animation Controls</h2>
+
+          <div class="controls">
+            <div class="control-group full-width">
+              <label>Canvas Size</label>
+              <div
+                class="slider-container"
+                style="display: flex; align-items: center; gap: 0.5rem"
+              >
+                <span>Width: </span>
+                <input
+                  type="range"
+                  id="canvas-width"
+                  min="100"
+                  max="600"
+                  value="300"
+                  style="flex: 1"
+                />
+                <span class="value-display" id="width-value">300px</span>
+              </div>
+              <div
+                class="slider-container"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  margin-top: 0.5rem;
+                "
+              >
+                <span>Height: </span>
+                <input
+                  type="range"
+                  id="canvas-height"
+                  min="100"
+                  max="600"
+                  value="300"
+                  style="flex: 1"
+                />
+                <span class="value-display" id="height-value">300px</span>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label>
+                Count <span class="value-display" id="count-value">10</span>
+              </label>
+              <input type="range" id="count" min="1" max="50" value="10" />
+            </div>
+
+            <div class="control-group">
+              <label>
+                Size <span class="value-display" id="size-value">20</span>
+              </label>
+              <input type="range" id="size" min="5" max="100" value="20" />
+            </div>
+
+            <div class="control-group">
+              <label>
+                Speed <span class="value-display" id="speed-value">1</span>
+              </label>
+              <input
+                type="range"
+                id="speed"
+                min="0.1"
+                max="10"
+                step="0.1"
+                value="1"
+              />
+            </div>
+
+            <div class="control-group">
+              <label>
+                Opacity <span class="value-display" id="opacity-value">1</span>
+              </label>
+              <input
+                type="range"
+                id="opacity"
+                min="0"
+                max="1"
+                step="0.05"
+                value="1"
+              />
+            </div>
+
+            <div class="control-group">
+              <label>Color</label>
+              <input type="color" id="color-picker" value="#3b82f6" />
+            </div>
+
+            <div class="control-group checkbox-control">
+              <input type="checkbox" id="gooey" checked />
+              <label for="gooey">Gooey Effect (limited in Canvas mode)</label>
+            </div>
+
+            <div class="control-group checkbox-control">
+              <input type="checkbox" id="scaleEffects" checked />
+              <label for="scaleEffects">Scale Effects</label>
+            </div>
+
+            <div class="control-group">
+              <label>Animation State</label>
+              <select id="state">
+                <option value="chaos">Chaos</option>
+                <option value="organizing">Organizing</option>
+                <option value="structured">Structured</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label>Pattern Variant</label>
+              <select id="variant">
+                <option value="default">Default</option>
+                <option value="spiral">Spiral</option>
+                <option value="explosion">Explosion</option>
+                <option value="wave">Wave</option>
+                <option value="orbit">Orbit</option>
+                <option value="flower">Flower</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button id="pause" class="action-button">Pause Animation</button>
+            <button id="resume" class="action-button" disabled>
+              Resume Animation
+            </button>
+            <button id="reset" class="action-button">Reset Animation</button>
+          </div>
+
+          <div class="performance-panel">
+            <div class="fps-display">
+              Performance: <span id="fps" class="fps-value">60 FPS</span>
+            </div>
+            <div>Elements: <span id="element-count">10</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Get DOM elements
+        const container = document.getElementById("animation-container");
+        const containerWrapper = document.getElementById("container-wrapper");
+        const canvasWidth = document.getElementById("canvas-width");
+        const canvasHeight = document.getElementById("canvas-height");
+        const widthValue = document.getElementById("width-value");
+        const heightValue = document.getElementById("height-value");
+        const countInput = document.getElementById("count");
+        const countValue = document.getElementById("count-value");
+        const sizeInput = document.getElementById("size");
+        const sizeValue = document.getElementById("size-value");
+        const speedInput = document.getElementById("speed");
+        const speedValue = document.getElementById("speed-value");
+        const opacityInput = document.getElementById("opacity");
+        const opacityValue = document.getElementById("opacity-value");
+        const colorPicker = document.getElementById("color-picker");
+        const gooeyInput = document.getElementById("gooey");
+        const scaleEffectsInput = document.getElementById("scaleEffects");
+        const stateSelect = document.getElementById("state");
+        const variantSelect = document.getElementById("variant");
+        const pauseButton = document.getElementById("pause");
+        const resumeButton = document.getElementById("resume");
+        const resetButton = document.getElementById("reset");
+        const fpsDisplay = document.getElementById("fps");
+        const elementCount = document.getElementById("element-count");
+        const svgModeButton = document.getElementById("svg-mode");
+        const canvasModeButton = document.getElementById("canvas-mode");
+
+        // Variables
+        let animation = null;
+        let renderMode = "svg"; // 'svg' or 'canvas'
+
+        // Initial config
+        const config = {
+          count: 10,
+          size: 20,
+          color: "#3b82f6",
+          colors: ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"],
+          opacity: 1,
+          speed: 1,
+          state: "chaos",
+          variant: "default",
+          gooey: true,
+          scaleEffects: true,
+          width: 300,
+          height: 300,
+        };
+
+        // Create animation
+        function createAnimation() {
+          if (animation) {
+            animation.destroy();
+            animation = null;
+          }
+
+          if (renderMode === "svg") {
+            animation = createAnim(container, config);
+          } else {
+            animation = createCanvasAnim(container, config);
+          }
+
+          // Start FPS counter
+          startFpsCounter();
+        }
+
+        // Start FPS counter
+        function startFpsCounter() {
+          setInterval(() => {
+            if (animation) {
+              const metrics = animation.getPerformanceMetrics();
+              fpsDisplay.textContent = `${metrics.fps} FPS`;
+            }
+          }, 1000);
+        }
+
+        // Update animation
+        function updateAnimation(changes) {
+          Object.assign(config, changes);
+
+          if (animation) {
+            animation.update(changes);
+          }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+          // Canvas size
+          canvasWidth.addEventListener("input", () => {
+            const width = parseInt(canvasWidth.value);
+            widthValue.textContent = `${width}px`;
+            container.style.width = `${width}px`;
+            updateAnimation({ width });
+          });
+
+          canvasHeight.addEventListener("input", () => {
+            const height = parseInt(canvasHeight.value);
+            heightValue.textContent = `${height}px`;
+            container.style.height = `${height}px`;
+            updateAnimation({ height });
+          });
+
+          // Count slider
+          countInput.addEventListener("input", () => {
+            const count = parseInt(countInput.value);
+            countValue.textContent = count;
+            elementCount.textContent = count;
+            updateAnimation({ count });
+          });
+
+          // Size slider
+          sizeInput.addEventListener("input", () => {
+            const size = parseInt(sizeInput.value);
+            sizeValue.textContent = size;
+            updateAnimation({ size });
+          });
+
+          // Speed slider
+          speedInput.addEventListener("input", () => {
+            const speed = parseFloat(speedInput.value);
+            speedValue.textContent = speed;
+            updateAnimation({ speed });
+          });
+
+          // Opacity slider
+          opacityInput.addEventListener("input", () => {
+            const opacity = parseFloat(opacityInput.value);
+            opacityValue.textContent = opacity;
+            updateAnimation({ opacity });
+          });
+
+          // Color picker
+          colorPicker.addEventListener("change", () => {
+            updateAnimation({ color: colorPicker.value });
+          });
+
+          // Toggle switches
+          gooeyInput.addEventListener("change", () => {
+            updateAnimation({ gooey: gooeyInput.checked });
+          });
+
+          scaleEffectsInput.addEventListener("change", () => {
+            updateAnimation({ scaleEffects: scaleEffectsInput.checked });
+          });
+
+          // Animation state & variant
+          stateSelect.addEventListener("change", () => {
+            updateAnimation({ state: stateSelect.value });
+
+            // Update variant options
+            populateVariantOptions();
+          });
+
+          variantSelect.addEventListener("change", () => {
+            updateAnimation({ variant: variantSelect.value });
+          });
+
+          // Animation controls
+          pauseButton.addEventListener("click", () => {
+            animation.pause();
+            pauseButton.disabled = true;
+            resumeButton.disabled = false;
+          });
+
+          resumeButton.addEventListener("click", () => {
+            animation.resume();
+            pauseButton.disabled = false;
+            resumeButton.disabled = true;
+          });
+
+          resetButton.addEventListener("click", () => {
+            animation.destroy();
+            createAnimation();
+            pauseButton.disabled = false;
+            resumeButton.disabled = true;
+          });
+
+          // Render mode buttons
+          svgModeButton.addEventListener("click", () => {
+            if (renderMode !== "svg") {
+              renderMode = "svg";
+              svgModeButton.classList.add("active");
+              canvasModeButton.classList.remove("active");
+              createAnimation();
+            }
+          });
+
+          canvasModeButton.addEventListener("click", () => {
+            if (renderMode !== "canvas") {
+              renderMode = "canvas";
+              canvasModeButton.classList.add("active");
+              svgModeButton.classList.remove("active");
+              createAnimation();
+            }
+          });
+        }
+
+        // Populate variant options based on current state
+        function populateVariantOptions() {
+          const state = stateSelect.value;
+          const currentVariant = variantSelect.value;
+
+          // Clear existing options
+          variantSelect.innerHTML = "";
+
+          // Get variants for current state
+          const patterns = {
+            chaos: ["default", "spiral", "explosion"],
+            organizing: ["default", "wave", "cylinder"],
+            structured: ["default", "orbit", "flower"],
+          };
+
+          const variants = patterns[state] || ["default"];
+
+          // Add options
+          variants.forEach((variant) => {
+            const option = document.createElement("option");
+            option.value = variant;
+            option.textContent =
+              variant.charAt(0).toUpperCase() + variant.slice(1);
+            variantSelect.appendChild(option);
+          });
+
+          // Try to set previous variant or default to first one
+          if (variants.includes(currentVariant)) {
+            variantSelect.value = currentVariant;
+          } else {
+            variantSelect.value = variants[0];
+            updateAnimation({ variant: variants[0] });
+          }
+        }
+
+        // Initialize UI
+        function initUI() {
+          // Set initial values
+          container.style.width = `${config.width}px`;
+          container.style.height = `${config.height}px`;
+          widthValue.textContent = `${config.width}px`;
+          heightValue.textContent = `${config.height}px`;
+          countValue.textContent = config.count;
+          sizeValue.textContent = config.size;
+          speedValue.textContent = config.speed;
+          opacityValue.textContent = config.opacity;
+
+          canvasWidth.value = config.width;
+          canvasHeight.value = config.height;
+          countInput.value = config.count;
+          sizeInput.value = config.size;
+          speedInput.value = config.speed;
+          opacityInput.value = config.opacity;
+          colorPicker.value = config.color;
+          gooeyInput.checked = config.gooey;
+          scaleEffectsInput.checked = config.scaleEffects;
+
+          // Set initial state and populate variants
+          stateSelect.value = config.state;
+          populateVariantOptions();
+        }
+
+        // Initialize
+        function init() {
+          initUI();
+          setupEventListeners();
+          createAnimation();
+        }
+
+        init();
+      });
+    </script>
+  </body>
+</html>

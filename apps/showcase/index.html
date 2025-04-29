@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BlobAnim Showcase - Interactive demo for creating stunning blob animations with web components"
+    />
+    <meta name="author" content="BlobAnim Team" />
+    <link rel="icon" href="./favicon.ico" />
+
+    <!-- Main stylesheets -->
+    <link rel="stylesheet" href="./style.css" />
+
+    <!-- Import web component directly -->
+    <!-- <script type="module" src="../packages/blob-anim/dist/blob-anim.es.js"></script> -->
+    <!-- BlobAnim will be imported via Vite alias in main.ts -->
+
+    <title>BlobAnim Web Component Showcase</title>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <h1>BlobAnim Showcase</h1>
+      </div>
+      <button
+        id="theme-toggle"
+        class="theme-toggle"
+        aria-label="Toggle dark/light theme"
+      >
+        🌙
+      </button>
+    </header>
+
+    <main class="container">
+      <div class="showcase-grid">
+        <!-- Animation Demo -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Interactive Demo</h2>
+          </div>
+          <div class="card-body">
+            <div class="animation-container">
+              <blob-anim
+                id="myBlob"
+                count="3"
+                size="40"
+                speed="1.5"
+                state="chaos"
+                variant="default"
+                color="#3b82f6"
+                gooey
+              ></blob-anim>
+            </div>
+          </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Control Panel</h2>
+          </div>
+          <div class="card-body">
+            <div class="control-form">
+              <div class="form-group">
+                <label for="count-slider"
+                  >Blob Count: <span id="count-value">3</span></label
+                >
+                <input
+                  type="range"
+                  id="count-slider"
+                  min="1"
+                  max="20"
+                  value="3"
+                  step="1"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="size-slider"
+                  >Size: <span id="size-value">40</span></label
+                >
+                <input
+                  type="range"
+                  id="size-slider"
+                  min="5"
+                  max="80"
+                  value="40"
+                  step="1"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="speed-slider"
+                  >Speed: <span id="speed-value">1.5</span></label
+                >
+                <input
+                  type="range"
+                  id="speed-slider"
+                  min="0.1"
+                  max="3"
+                  value="1.5"
+                  step="0.1"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="color-picker">Color</label>
+                <input type="color" id="color-picker" value="#3b82f6" />
+              </div>
+
+              <!-- Advanced Color Controls -->
+              <div class="form-group">
+                <label>Colors</label>
+                <div class="color-controls-grid">
+                  <div class="color-list-column">
+                    <div class="color-chips" id="colorChips"></div>
+                  </div>
+                  <div class="color-actions-column">
+                    <div class="color-picker-container">
+                      <input type="color" id="colorPicker" value="#3b82f6" />
+                      <button id="addColorBtn" class="small" type="button">Add</button>
+                      <button id="clearColorsBtn" class="small" type="button">Reset</button>
+                    </div>
+                    <div class="opacity-slider-container">
+                      <label for="colorOpacitySlider">
+                        Opacity
+                        <span class="value" id="opacityValueDisplay">1.0</span>
+                      </label>
+                      <input type="range" id="colorOpacitySlider" min="0.1" max="1" step="0.1" value="1.0" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Effects Toggles -->
+              <div class="form-group">
+                <label><input type="checkbox" id="gooey" checked /> Gooey Effect</label>
+                <label><input type="checkbox" id="scaleEffects" checked /> Scale Effects</label>
+              </div>
+
+              <!-- Variant Dropdown -->
+              <div class="form-group">
+                <label for="variant-select">Variant</label>
+                <select id="variant-select">
+                  <option value="default">Default</option>
+                  <option value="spiral">Spiral</option>
+                  <option value="explosion">Explosion</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="state-select">Animation State</label>
+                <select id="state-select">
+                  <option value="chaos">Chaos</option>
+                  <option value="organizing">Organizing</option>
+                  <option value="structured">Structured</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <div class="checkbox-group">
+                  <input type="checkbox" id="scale-checkbox" checked />
+                  <label for="scale-checkbox">Scale Effects</label>
+                </div>
+              </div>
+
+              <div class="button-group">
+                <button id="update-btn" class="primary">Update</button>
+                <button id="pause-btn" class="secondary">Pause</button>
+                <button id="resume-btn" class="secondary">Resume</button>
+                <button id="reset-btn" class="secondary">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HTML Code Example -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Usage Examples</h2>
+          </div>
+          <div class="card-body">
+            <div class="tabs">
+              <div class="tab active" data-tab="html">HTML</div>
+              <div class="tab" data-tab="js">JavaScript</div>
+            </div>
+
+            <div class="tab-content active" id="html-tab">
+              <pre><code>&lt;!-- Import the web component -->
+&lt;script type="module" src="blob-anim/web-component">&lt;/script>
+
+&lt;!-- Use it in your HTML -->
+&lt;blob-anim
+  count="3"
+  size="40"
+  speed="1.5"
+  state="chaos"
+  variant="default"
+  color="#3b82f6"
+  gooey
+>&lt;/blob-anim></code></pre>
+            </div>
+
+            <div class="tab-content" id="js-tab">
+              <pre><code>// Get reference to the element
+const blob = document.getElementById('myBlob');
+
+// Update multiple properties at once
+blob.update({
+  count: 30,
+  size: 10,
+  color: "#10b981",
+  state: "organizing",
+  speed: 1.5,
+  gooey: false
+});
+
+// Control methods
+blob.pause();   // Pause animation
+blob.resume();  // Resume animation
+blob.resize(300, 300); // Resize container and animation
+blob.destroy(); // Clean up resources
+</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configuration Options -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Configuration Options</h2>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Option</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>count</code></td>
+                  <td>Number</td>
+                  <td>10</td>
+                  <td>Number of blobs to display</td>
+                </tr>
+                <tr>
+                  <td><code>size</code></td>
+                  <td>Number</td>
+                  <td>20</td>
+                  <td>Size of each blob</td>
+                </tr>
+                <tr>
+                  <td><code>color</code></td>
+                  <td>String</td>
+                  <td>#3b82f6</td>
+                  <td>Color of the blobs</td>
+                </tr>
+                <tr>
+                  <td><code>speed</code></td>
+                  <td>Number</td>
+                  <td>1</td>
+                  <td>Animation speed</td>
+                </tr>
+                <tr>
+                  <td><code>state</code></td>
+                  <td>String</td>
+                  <td>chaos</td>
+                  <td>Animation state (chaos, organizing, structured)</td>
+                </tr>
+                <tr>
+                  <td><code>gooey</code></td>
+                  <td>Boolean</td>
+                  <td>true</td>
+                  <td>Enable gooey effect</td>
+                </tr>
+                <tr>
+                  <td><code>scaleeffects</code></td>
+                  <td>Boolean</td>
+                  <td>true</td>
+                  <td>Enable scaling animations</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>
+        BlobAnim Showcase - A visual playground for creating beautiful blob
+        animations
+        <br />
+        Designed with ❤️ by BlobAnim Team
+      </p>
+    </footer>
+
+    <!-- Main application script -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

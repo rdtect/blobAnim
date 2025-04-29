@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlobAnim Demo</title>
+    <script type="module" src="./components/blob-anim.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        background: #ffffff;
+      }
+      blob-anim {
+        display: block;
+        width: 400px;
+        height: 400px;
+        border: 2px solid #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <blob-anim
+      id="myBlob"
+      count="20"
+      variant="default"
+      state="chaos"
+      speed="1.5"
+      size="20"
+      count="3"
+      gooey
+    >
+    </blob-anim>
+    <script>
+      const blob = document.getElementById("myBlob");
+      blob.update({
+        count: 30,
+        size: 10,
+        color: "#10b981",
+        state: "organized",
+        speed: 1.5,
+        gooey: false,
+      });
+
+      // Temporarily pause the animation
+      blob.pause();
+
+      // Resume it later
+      blob.resume();
+
+      // Resize container + update animation space
+      blob.resize(300, 300);
+
+      // Clean up when removing from DOM
+      blob.destroy();
+    </script>
+  </body>
+</html>

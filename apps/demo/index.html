@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blob Animation Demos</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #2563eb;
+      }
+      .package-section {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        color: #1e40af;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 10px;
+        margin-top: 0;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        margin-bottom: 12px;
+      }
+      a {
+        display: inline-block;
+        color: #2563eb;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        background-color: #eff6ff;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      a:hover {
+        background-color: #dbeafe;
+        transform: translateY(-2px);
+      }
+      .description {
+        color: #6b7280;
+        margin-top: 4px;
+        font-size: 0.9em;
+      }
+      .back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #2563eb;
+        color: white;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .back-to-top:hover {
+        background-color: #1e40af;
+      }
+      #demo-viewer {
+        display: none;
+        margin-top: 40px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .demo-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: #f1f5f9;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .demo-info {
+        flex: 1;
+      }
+      .demo-info h3 {
+        margin: 0;
+        color: #1e40af;
+      }
+      .demo-path {
+        font-size: 0.8em;
+        color: #64748b;
+        margin-top: 5px;
+      }
+      #close-demo {
+        background-color: #e2e8f0;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: background-color 0.2s;
+      }
+      #close-demo:hover {
+        background-color: #cbd5e1;
+      }
+      .demo-frame-container {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+      }
+      #demo-frame {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      .loading-indicator {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #64748b;
+      }
+      .status-bar {
+        padding: 10px 20px;
+        background-color: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        font-size: 0.8em;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Blob Animation Demos</h1>
+
+    <div id="demo-container">
+      <!-- Demo sections will be dynamically generated here -->
+    </div>
+
+    <div id="demo-viewer">
+      <div class="demo-header">
+        <div class="demo-info">
+          <h3 id="demo-title">Demo</h3>
+          <div class="demo-path" id="demo-path"></div>
+        </div>
+        <button id="close-demo">Close Demo</button>
+      </div>
+      <div class="demo-frame-container">
+        <iframe id="demo-frame" src="about:blank" title="Demo Preview"></iframe>
+        <div class="loading-indicator">Loading...</div>
+      </div>
+      <div class="status-bar">
+        Note: Some demos may require a full page reload to work properly. If a
+        demo doesn't load correctly in the iframe, you can open it in a new tab.
+      </div>
+    </div>
+
+    <a href="#" class="back-to-top">↑</a>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

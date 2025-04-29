@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlobAnim Interactive Demo</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="simple.js"></script>
+    <script src="config.js"></script>
+    <style>
+      :root {
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
+        --secondary: #6366f1;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --purple: #8b5cf6;
+        --background: #f8fafc;
+        --text: #1e293b;
+        --border: #e2e8f0;
+        --card: #ffffff;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", sans-serif;
+        background-color: var(--background);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      .header {
+        background-color: var(--card);
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 10;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        color: var(--primary);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: minmax(300px, 600px) 1fr;
+        gap: 2rem;
+      }
+
+      .animation-container-wrapper {
+        resize: both;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .animation-container {
+        width: 100%;
+        height: 100%;
+        min-width: 300px;
+        min-height: 300px;
+        border-radius: 12px;
+        background-color: var(--card);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .controls-panel {
+        background-color: var(--card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .panel-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .control-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .control-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      select,
+      input[type="range"],
+      input[type="color"] {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background-color: #fff;
+        font-size: 0.9rem;
+      }
+
+      input[type="checkbox"] {
+        margin-right: 0.5rem;
+        transform: scale(1.2);
+      }
+
+      .checkbox-control {
+        display: flex;
+        align-items: center;
+      }
+
+      .value-display {
+        display: inline-block;
+        margin-left: 0.5rem;
+        background-color: var(--primary);
+        color: white;
+        padding: 0.1rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        min-width: 2rem;
+        text-align: center;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .button-group button {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        background-color: var(--background);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+        min-width: 80px;
+      }
+
+      .button-group button.active {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .action-button {
+        padding: 0.75rem 1.5rem;
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        flex: 1;
+      }
+
+      .action-button:hover:not(:disabled) {
+        background-color: var(--primary-hover);
+      }
+
+      .action-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .action-button.danger {
+        background-color: var(--danger);
+      }
+
+      .action-button.secondary {
+        background-color: var(--secondary);
+      }
+
+      .performance-panel {
+        background-color: var(--card);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .fps-display {
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      .fps-value {
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      .color-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .color-chip {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        position: relative;
+      }
+
+      .color-chip.selected {
+        box-shadow: 0 0 0 2px var(--primary);
+      }
+
+      .color-chip.transparent {
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><rect x="0" y="0" width="8" height="8" fill="%23f0f0f0" /><rect x="8" y="8" width="8" height="8" fill="%23f0f0f0" /><rect x="8" y="0" width="8" height="8" fill="%23ffffff" /><rect x="0" y="8" width="8" height="8" fill="%23ffffff" /></svg>');
+        background-size: 10px 10px;
+      }
+
+      .color-selector {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .delete-color {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 16px;
+        height: 16px;
+        background-color: var(--danger);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        cursor: pointer;
+      }
+
+      .add-color {
+        border: 2px dashed var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+      }
+
+      /* Slider customization */
+      .slider-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .slider-container input[type="range"] {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>BlobAnim Interactive Demo</h1>
+    </div>
+
+    <div class="container">
+      <div class="main-content">
+        <div class="animation-container-wrapper" id="container-wrapper">
+          <div id="animation" class="animation-container"></div>
+        </div>
+
+        <div class="controls-panel">
+          <h2 class="panel-title">Animation Controls</h2>
+
+          <div class="controls">
+            <div class="control-group full-width">
+              <label>Canvas Size</label>
+              <div class="slider-container">
+                <span>Width: </span>
+                <input
+                  type="range"
+                  id="canvas-width"
+                  min="300"
+                  max="600"
+                  value="450"
+                />
+                <span class="value-display" id="width-value">450px</span>
+              </div>
+              <div class="slider-container" style="margin-top: 0.5rem">
+                <span>Height: </span>
+                <input
+                  type="range"
+                  id="canvas-height"
+                  min="300"
+                  max="600"
+                  value="450"
+                />
+                <span class="value-display" id="height-value">450px</span>
+              </div>
+            </div>
+
+            <div class="control-group full-width">
+              <label>Animation State</label>
+              <div class="button-group" id="state-buttons">
+                <!-- Animation state buttons will be generated here -->
+              </div>
+            </div>
+
+            <div class="control-group full-width">
+              <label>Pattern Variant</label>
+              <div class="button-group" id="pattern-buttons">
+                <!-- Pattern variant buttons will be generated here -->
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label>
+                Count <span class="value-display" id="count-value">10</span>
+              </label>
+              <input type="range" id="count" min="1" max="50" value="10" />
+            </div>
+
+            <div class="control-group">
+              <label>
+                Size <span class="value-display" id="size-value">40</span>
+              </label>
+              <input type="range" id="size" min="5" max="100" value="40" />
+            </div>
+
+            <div class="control-group">
+              <label>
+                Speed <span class="value-display" id="speed-value">5</span>
+              </label>
+              <input
+                type="range"
+                id="speed"
+                min="0.1"
+                max="10"
+                step="0.1"
+                value="5"
+              />
+            </div>
+
+            <div class="control-group">
+              <label>
+                Intensity
+                <span class="value-display" id="intensity-value">0.5</span>
+              </label>
+              <input
+                type="range"
+                id="intensity"
+                min="0"
+                max="1"
+                step="0.05"
+                value="0.5"
+              />
+            </div>
+
+            <div class="control-group">
+              <label>
+                Opacity
+                <span class="value-display" id="opacity-value">0.85</span>
+              </label>
+              <input
+                type="range"
+                id="opacity"
+                min="0"
+                max="1"
+                step="0.05"
+                value="0.85"
+              />
+            </div>
+
+            <div class="control-group full-width">
+              <label>Colors</label>
+              <div class="color-selector">
+                <input type="color" id="color-picker" value="#3b82f6" />
+                <button id="add-color" class="action-button">Add Color</button>
+              </div>
+              <div class="color-chips" id="color-chips">
+                <div
+                  class="color-chip selected"
+                  style="background-color: #3b82f6"
+                  data-color="#3b82f6"
+                >
+                  <span class="delete-color">×</span>
+                </div>
+                <div class="color-chip transparent" title="Glass/Transparent">
+                  <span class="delete-color">×</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="control-group checkbox-control">
+              <input type="checkbox" id="gooey" checked />
+              <label for="gooey">Gooey Effect</label>
+            </div>
+
+            <div class="control-group checkbox-control">
+              <input type="checkbox" id="solidColor" checked />
+              <label for="solidColor">Solid Color (Single)</label>
+            </div>
+
+            <div class="control-group checkbox-control">
+              <input type="checkbox" id="scaleEffects" checked />
+              <label for="scaleEffects">Scale Effects</label>
+            </div>
+
+            <div class="control-group checkbox-control">
+              <input type="checkbox" id="showGlass" />
+              <label for="showGlass">Include Glass Metaballs</label>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button id="pause" class="action-button">Pause Animation</button>
+            <button id="resume" class="action-button" disabled>
+              Resume Animation
+            </button>
+            <button id="reset" class="action-button secondary">
+              Reset to Defaults
+            </button>
+          </div>
+
+          <div class="performance-panel">
+            <div class="fps-display">
+              Performance: <span id="fps" class="fps-value">60 FPS</span>
+            </div>
+            <div>Elements: <span id="element-count">10</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Get the ConfigManager from the imported config.js
+      const configManager = BlobConfig.getConfigManager();
+
+      // Get DOM elements
+      const container = document.getElementById("animation");
+      const containerWrapper = document.getElementById("container-wrapper");
+      const canvasWidthInput = document.getElementById("canvas-width");
+      const canvasHeightInput = document.getElementById("canvas-height");
+      const widthValue = document.getElementById("width-value");
+      const heightValue = document.getElementById("height-value");
+      const stateButtons = document.getElementById("state-buttons");
+      const patternButtons = document.getElementById("pattern-buttons");
+      const countInput = document.getElementById("count");
+      const countValue = document.getElementById("count-value");
+      const sizeInput = document.getElementById("size");
+      const sizeValue = document.getElementById("size-value");
+      const speedInput = document.getElementById("speed");
+      const speedValue = document.getElementById("speed-value");
+      const intensityInput = document.getElementById("intensity");
+      const intensityValue = document.getElementById("intensity-value");
+      const opacityInput = document.getElementById("opacity");
+      const opacityValue = document.getElementById("opacity-value");
+      const colorPicker = document.getElementById("color-picker");
+      const addColorBtn = document.getElementById("add-color");
+      const colorChips = document.getElementById("color-chips");
+      const gooeyInput = document.getElementById("gooey");
+      const solidColorInput = document.getElementById("solidColor");
+      const scaleEffectsInput = document.getElementById("scaleEffects");
+      const showGlassInput = document.getElementById("showGlass");
+      const fpsDisplay = document.getElementById("fps");
+      const elementCount = document.getElementById("element-count");
+      const pauseButton = document.getElementById("pause");
+      const resumeButton = document.getElementById("resume");
+      const resetButton = document.getElementById("reset");
+
+      // Create animation with properly mapped config
+      let animation = createAnim(
+        container,
+        BlobConfig.mapConfigToAnimProps(configManager.getConfig())
+      );
+
+      // Generate state buttons
+      function generateStateButtons() {
+        stateButtons.innerHTML = "";
+        BlobConfig.ANIMATION_STATES.forEach((state) => {
+          const button = document.createElement("button");
+          button.textContent = state.charAt(0).toUpperCase() + state.slice(1);
+          button.dataset.state = state;
+          if (state === configManager.getConfig().state) {
+            button.classList.add("active");
+          }
+          button.addEventListener("click", () => {
+            // Remove active class from all buttons
+            Array.from(stateButtons.children).forEach((btn) =>
+              btn.classList.remove("active")
+            );
+            // Add active class to clicked button
+            button.classList.add("active");
+            // Update config
+            configManager.updateConfig({ state });
+            // Update pattern buttons
+            generatePatternButtons();
+          });
+          stateButtons.appendChild(button);
+        });
+      }
+
+      // Generate pattern buttons
+      function generatePatternButtons() {
+        patternButtons.innerHTML = "";
+        const currentState = configManager.getConfig().state;
+        const statePatterns = BlobConfig.PATTERNS[currentState] || [];
+
+        statePatterns.forEach((pattern) => {
+          const button = document.createElement("button");
+          button.textContent =
+            pattern.charAt(0).toUpperCase() + pattern.slice(1);
+          button.dataset.pattern = pattern;
+          if (pattern === configManager.getConfig().variant) {
+            button.classList.add("active");
+          }
+          button.addEventListener("click", () => {
+            // Remove active class from all buttons
+            Array.from(patternButtons.children).forEach((btn) =>
+              btn.classList.remove("active")
+            );
+            // Add active class to clicked button
+            button.classList.add("active");
+            // Update config
+            configManager.updateConfig({ variant: pattern });
+          });
+          patternButtons.appendChild(button);
+        });
+      }
+
+      // Setup color chips
+      function setupColorChips() {
+        // Clear existing color chips
+        colorChips.innerHTML = "";
+
+        // Add current colors
+        const colors = configManager.getConfig().colors || ["#3b82f6"];
+        colors.forEach((color) => {
+          addColorChip(color);
+        });
+
+        // Add transparent/glass option if enabled
+        if (configManager.getConfig().showGlass) {
+          addGlassColorChip();
+        }
+      }
+
+      // Add a color chip
+      function addColorChip(color) {
+        const chip = document.createElement("div");
+        chip.className = "color-chip";
+        chip.style.backgroundColor = color;
+        chip.dataset.color = color;
+
+        // Active state based on primary color
+        if (color === configManager.getConfig().color) {
+          chip.classList.add("selected");
+        }
+
+        // Add delete button
+        const deleteBtn = document.createElement("span");
+        deleteBtn.className = "delete-color";
+        deleteBtn.textContent = "×";
+        deleteBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          // Don't delete if it's the last color
+          const colors = configManager.getConfig().colors;
+          if (colors.length <= 1) return;
+
+          // Remove color from config
+          const newColors = colors.filter((c) => c !== color);
+          configManager.updateConfig({
+            colors: newColors,
+            color:
+              color === configManager.getConfig().color
+                ? newColors[0]
+                : configManager.getConfig().color,
+          });
+
+          // Update UI
+          setupColorChips();
+        });
+        chip.appendChild(deleteBtn);
+
+        // Select color on click
+        chip.addEventListener("click", () => {
+          // Update primary color
+          configManager.updateConfig({ color });
+
+          // Update UI selection
+          document
+            .querySelectorAll(".color-chip")
+            .forEach((c) => c.classList.remove("selected"));
+          chip.classList.add("selected");
+        });
+
+        colorChips.appendChild(chip);
+      }
+
+      // Add glass/transparent metaball option
+      function addGlassColorChip() {
+        const chip = document.createElement("div");
+        chip.className = "color-chip transparent";
+        chip.title = "Glass/Transparent";
+
+        // Add delete button for consistency
+        const deleteBtn = document.createElement("span");
+        deleteBtn.className = "delete-color";
+        deleteBtn.textContent = "×";
+        deleteBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          // Disable glass effect
+          configManager.updateConfig({ showGlass: false });
+          chip.remove();
+        });
+        chip.appendChild(deleteBtn);
+
+        colorChips.appendChild(chip);
+      }
+
+      // Initialize UI components
+      function initUI() {
+        // Generate animation state buttons
+        generateStateButtons();
+
+        // Generate pattern buttons for current state
+        generatePatternButtons();
+
+        // Setup color chips
+        setupColorChips();
+
+        // Set initial values
+        const config = configManager.getConfig();
+
+        // Canvas size
+        canvasWidthInput.value = config.width;
+        canvasHeightInput.value = config.height;
+        widthValue.textContent = `${config.width}px`;
+        heightValue.textContent = `${config.height}px`;
+        containerWrapper.style.width = `${config.width}px`;
+        containerWrapper.style.height = `${config.height}px`;
+
+        // Other controls
+        countInput.value = config.count;
+        countValue.textContent = config.count;
+        elementCount.textContent = config.count;
+
+        sizeInput.value = config.size;
+        sizeValue.textContent = config.size;
+
+        speedInput.value = config.speed;
+        speedValue.textContent = config.speed;
+
+        intensityInput.value = config.intensity;
+        intensityValue.textContent = config.intensity;
+
+        opacityInput.value = config.opacity;
+        opacityValue.textContent = config.opacity;
+
+        colorPicker.value = config.color;
+
+        gooeyInput.checked = config.gooey;
+        solidColorInput.checked = config.solidColor;
+        scaleEffectsInput.checked = config.scaleEffects;
+        showGlassInput.checked = config.showGlass;
+      }
+
+      // Setup event listeners
+      function setupEventListeners() {
+        // Canvas size
+        canvasWidthInput.addEventListener("input", () => {
+          const width = parseInt(canvasWidthInput.value);
+          widthValue.textContent = `${width}px`;
+          containerWrapper.style.width = `${width}px`;
+          configManager.updateConfig({ width });
+        });
+
+        canvasHeightInput.addEventListener("input", () => {
+          const height = parseInt(canvasHeightInput.value);
+          heightValue.textContent = `${height}px`;
+          containerWrapper.style.height = `${height}px`;
+          configManager.updateConfig({ height });
+        });
+
+        // Count slider
+        countInput.addEventListener("input", () => {
+          const count = parseInt(countInput.value);
+          countValue.textContent = count;
+          elementCount.textContent = count;
+          configManager.updateConfig({ count });
+        });
+
+        // Size slider
+        sizeInput.addEventListener("input", () => {
+          const size = parseInt(sizeInput.value);
+          sizeValue.textContent = size;
+          configManager.updateConfig({ size });
+        });
+
+        // Speed slider
+        speedInput.addEventListener("input", () => {
+          const speed = parseFloat(speedInput.value);
+          speedValue.textContent = speed;
+          configManager.updateConfig({ speed });
+        });
+
+        // Intensity slider
+        intensityInput.addEventListener("input", () => {
+          const intensity = parseFloat(intensityInput.value);
+          intensityValue.textContent = intensity;
+          configManager.updateConfig({ intensity });
+        });
+
+        // Opacity slider
+        opacityInput.addEventListener("input", () => {
+          const opacity = parseFloat(opacityInput.value);
+          opacityValue.textContent = opacity;
+          configManager.updateConfig({ opacity });
+        });
+
+        // Color picker
+        colorPicker.addEventListener("change", () => {
+          const color = colorPicker.value;
+          configManager.updateConfig({ color });
+
+          // Update selected color chip
+          document.querySelectorAll(".color-chip").forEach((chip) => {
+            if (chip.dataset.color === color) {
+              chip.classList.add("selected");
+            } else {
+              chip.classList.remove("selected");
+            }
+          });
+        });
+
+        // Add color button
+        addColorBtn.addEventListener("click", () => {
+          const color = colorPicker.value;
+          const colors = [...configManager.getConfig().colors];
+
+          // Don't add duplicates
+          if (!colors.includes(color)) {
+            colors.push(color);
+            configManager.updateConfig({ colors });
+            addColorChip(color);
+          }
+        });
+
+        // Toggle checkboxes
+        gooeyInput.addEventListener("change", () => {
+          configManager.updateConfig({ gooey: gooeyInput.checked });
+        });
+
+        solidColorInput.addEventListener("change", () => {
+          configManager.updateConfig({ solidColor: solidColorInput.checked });
+        });
+
+        scaleEffectsInput.addEventListener("change", () => {
+          configManager.updateConfig({
+            scaleEffects: scaleEffectsInput.checked,
+          });
+        });
+
+        showGlassInput.addEventListener("change", () => {
+          configManager.updateConfig({ showGlass: showGlassInput.checked });
+
+          // Update UI
+          if (
+            showGlassInput.checked &&
+            !document.querySelector(".color-chip.transparent")
+          ) {
+            addGlassColorChip();
+          } else if (!showGlassInput.checked) {
+            const glassChip = document.querySelector(".color-chip.transparent");
+            if (glassChip) glassChip.remove();
+          }
+        });
+
+        // Pause/Resume buttons
+        pauseButton.addEventListener("click", () => {
+          animation.pause();
+          pauseButton.disabled = true;
+          resumeButton.disabled = false;
+        });
+
+        resumeButton.addEventListener("click", () => {
+          animation.resume();
+          pauseButton.disabled = false;
+          resumeButton.disabled = true;
+        });
+
+        // Reset button
+        resetButton.addEventListener("click", () => {
+          configManager.resetConfig();
+          initUI();
+        });
+      }
+
+      // Update animation when config changes
+      function handleConfigUpdate(newConfig, oldConfig) {
+        // Use the mapConfigToAnimProps function from config.js to map properties
+        const animConfig = BlobConfig.mapConfigToAnimProps(newConfig);
+
+        // Update the animation
+        animation.update(animConfig);
+      }
+
+      // Initialize everything
+      function init() {
+        // Initialize UI
+        initUI();
+
+        // Setup event listeners
+        setupEventListeners();
+
+        // Subscribe to config changes
+        configManager.subscribe(handleConfigUpdate);
+
+        // Start FPS counter
+        setInterval(() => {
+          const metrics = animation.getPerformanceMetrics();
+          fpsDisplay.textContent = `${metrics.fps} FPS`;
+        }, 1000);
+      }
+
+      // Start the application
+      init();
+    </script>
+  </body>
+</html>

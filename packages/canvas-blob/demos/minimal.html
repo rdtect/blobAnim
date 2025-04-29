@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minimal P5.js Metaball Demo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f5f5f5;
+      }
+      .container {
+        width: 500px;
+        height: 500px;
+        position: relative;
+        background-color: #1a1a2e;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19),
+          0 6px 6px rgba(0, 0, 0, 0.23);
+      }
+      canvas {
+        display: block;
+      }
+      .controls {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 4px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+      .controls label {
+        display: block;
+        margin: 5px 0;
+        font-size: 14px;
+      }
+      .controls input {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="canvas-container"></div>
+
+    <script>
+      // P5.js sketch
+      let balls = [];
+      let threshold = 0.65; // Metaball threshold
+      let numBalls = 5;
+      let ballSize = 50;
+      let speed = 1;
+      let mainColor = [74, 108, 247]; // #4a6cf7
+
+      const sketch = (p) => {
+        let metaballShader;
+        let maxBalls = 9; // Maximum number of balls supported by shader
+
+        p.setup = () => {
+          // Create canvas to fill the container
+          const container = document.getElementById("canvas-container");
+          const canvas = p.createCanvas(
+            container.clientWidth,
+            container.clientHeight,
+            p.WEBGL
+          );
+          canvas.parent(container);
+
+          // Create and initialize balls
+          for (let i = 0; i < numBalls; i++) {
+            balls.push({
+              position: p.createVector(
+                p.random(-width / 3, width / 3),
+                p.random(-height / 3, height / 3)
+              ),
+              velocity: p
+                .createVector(p.random(-1, 1), p.random(-1, 1))
+                .mult(speed),
+              radius: ballSize,
+              maxRadius: p.random(40, 60),
+            });
+          }
+
+          // Create the metaball shader
+          metaballShader = p.createShader(
+            // Vertex shader
+            `attribute vec3 aPosition;
+          uniform float u_width;
+          uniform float u_height;
+          varying vec2 vPos;
+
+          void main() {
+            gl_Position = vec4(aPosition, 1.0);
+            vPos = vec2(
+              (gl_Position.x + 1.0) / 2.0 * u_width,
+              (gl_Position.y + 1.0) / 2.0 * u_height
+            );
+          }`,
+
+            // Fragment shader
+            `precision highp float;
+          
+          #define MAX_BALLS 9
+          
+          uniform float u_threshold;
+          uniform float u_smoothing;
+          uniform vec3 u_color;
+          uniform float u_x[MAX_BALLS];
+          uniform float u_y[MAX_BALLS];
+          uniform float u_r[MAX_BALLS];
+          uniform int u_numBalls;
+          
+          varying vec2 vPos;
+          
+          void main() {
+            float sum = 0.0;
+            
+            // Calculate the metaball field function
+            for (int i = 0; i < MAX_BALLS; i++) {
+              if (i >= u_numBalls) break;
+              
+              float dx = u_x[i] - vPos.x;
+              float dy = u_y[i] - vPos.y;
+              float d = sqrt(dx*dx + dy*dy);
+              
+              // Field function with better falloff
+              sum += u_r[i] * u_r[i] / max(d*d, 0.001);
+            }
+            
+            // Smooth transition at the edges
+            float alpha = smoothstep(u_threshold - u_smoothing, u_threshold + u_smoothing, sum);
+            
+            // Output the color with alpha for the metaball
+            gl_FragColor = vec4(u_color/255.0, alpha);
+          }`
+          );
+
+          p.noStroke();
+        };
+
+        p.draw = () => {
+          p.clear();
+          updateBalls();
+
+          // Use metaball shader
+          p.shader(metaballShader);
+
+          // Set shader uniforms
+          metaballShader.setUniform("u_width", p.width);
+          metaballShader.setUniform("u_height", p.height);
+          metaballShader.setUniform("u_threshold", threshold);
+          metaballShader.setUniform("u_smoothing", 0.1);
+          metaballShader.setUniform("u_color", mainColor);
+          metaballShader.setUniform(
+            "u_numBalls",
+            Math.min(balls.length, maxBalls)
+          );
+
+          // Set ball positions and radii
+          const ballX = new Array(maxBalls).fill(0);
+          const ballY = new Array(maxBalls).fill(0);
+          const ballR = new Array(maxBalls).fill(0);
+
+          for (let i = 0; i < Math.min(balls.length, maxBalls); i++) {
+            const ball = balls[i];
+            ballX[i] = ball.position.x + p.width / 2;
+            ballY[i] = ball.position.y + p.height / 2;
+            ballR[i] = ball.radius;
+          }
+
+          metaballShader.setUniform("u_x", ballX);
+          metaballShader.setUniform("u_y", ballY);
+          metaballShader.setUniform("u_r", ballR);
+
+          // Draw fullscreen quad
+          p.quad(-1, -1, 1, -1, 1, 1, -1, 1);
+        };
+
+        function updateBalls() {
+          for (let i = 0; i < balls.length; i++) {
+            const ball = balls[i];
+
+            // Move balls
+            ball.position.add(
+              p.createVector(ball.velocity.x * speed, ball.velocity.y * speed)
+            );
+
+            // Bounce off walls
+            if (
+              ball.position.x > p.width / 2 - ball.radius ||
+              ball.position.x < -p.width / 2 + ball.radius
+            ) {
+              ball.velocity.x *= -1;
+            }
+            if (
+              ball.position.y > p.height / 2 - ball.radius ||
+              ball.position.y < -p.height / 2 + ball.radius
+            ) {
+              ball.velocity.y *= -1;
+            }
+
+            // Pulse size
+            ball.radius =
+              ballSize * (0.8 + 0.2 * Math.sin(p.frameCount * 0.02 + i));
+          }
+        }
+
+        // Handle window resize
+        p.windowResized = () => {
+          const container = document.getElementById("canvas-container");
+          p.resizeCanvas(container.clientWidth, container.clientHeight);
+        };
+      };
+
+      // Create p5 instance
+      new p5(sketch);
+    </script>
+  </body>
+</html>
